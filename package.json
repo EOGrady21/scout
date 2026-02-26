@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:setup": "npx tsx scripts/db-setup.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.3",
