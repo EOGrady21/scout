@@ -3,8 +3,5 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "env": {
-    "NEXTAUTH_URL": "https://your-app.vercel.app"
-  }
+  "installCommand": "npm install"
 }
