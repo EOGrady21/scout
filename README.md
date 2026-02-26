@@ -146,3 +146,4 @@ A GIST index on `locations.geom` enables fast bounding-box and nearest-neighbour
 
 MIT
 DRAFT: A community conditions platform where you can scout your next adventure
+
