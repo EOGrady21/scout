@@ -1,12 +1,20 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, NeonQueryFunction } from "@neondatabase/serverless";
+import type { Location, Condition, User } from "@/types";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is not set");
+// Lazily initialise the Neon client so the module can be imported at build
+// time even when DATABASE_URL is not yet set (e.g. during `next build` CI).
+let _sql: NeonQueryFunction<false, false> | undefined;
+function getSql(): NeonQueryFunction<false, false> {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("DATABASE_URL environment variable is not set");
+    _sql = neon(url);
+  }
+  return _sql;
 }
 
-export const sql = neon(process.env.DATABASE_URL);
-
-export async function getLocations() {
+export async function getLocations(): Promise<Location[]> {
+  const sql = getSql();
   const rows = await sql`
     SELECT
       l.id,
@@ -23,10 +31,11 @@ export async function getLocations() {
     GROUP BY l.id
     ORDER BY l.created_at DESC
   `;
-  return rows;
+  return rows as unknown as Location[];
 }
 
-export async function getLocationById(id: string) {
+export async function getLocationById(id: string): Promise<Location | null> {
+  const sql = getSql();
   const rows = await sql`
     SELECT
       l.id,
@@ -39,10 +48,11 @@ export async function getLocationById(id: string) {
     FROM locations l
     WHERE l.id = ${id}
   `;
-  return rows[0] ?? null;
+  return (rows as unknown as Location[])[0] ?? null;
 }
 
-export async function getConditionsByLocationId(locationId: string) {
+export async function getConditionsByLocationId(locationId: string): Promise<Condition[]> {
+  const sql = getSql();
   const rows = await sql`
     SELECT
       c.id,
@@ -61,7 +71,7 @@ export async function getConditionsByLocationId(locationId: string) {
     ORDER BY c.condition_date DESC
     LIMIT 20
   `;
-  return rows;
+  return rows as unknown as Condition[];
 }
 
 export async function createLocation(data: {
@@ -70,7 +80,8 @@ export async function createLocation(data: {
   latitude: number;
   longitude: number;
   created_by: string;
-}) {
+}): Promise<Location> {
+  const sql = getSql();
   const rows = await sql`
     INSERT INTO locations (name, description, latitude, longitude, geom, created_by)
     VALUES (
@@ -83,7 +94,7 @@ export async function createLocation(data: {
     )
     RETURNING id, name, description, latitude, longitude, created_by, created_at
   `;
-  return rows[0];
+  return (rows as unknown as Location[])[0];
 }
 
 export async function createCondition(data: {
@@ -93,7 +104,8 @@ export async function createCondition(data: {
   rating: number;
   description: string;
   photo_url: string | null;
-}) {
+}): Promise<Condition> {
+  const sql = getSql();
   const rows = await sql`
     INSERT INTO conditions (location_id, user_id, condition_date, rating, description, photo_url)
     VALUES (
@@ -106,7 +118,7 @@ export async function createCondition(data: {
     )
     RETURNING id, location_id, user_id, condition_date, rating, description, photo_url, created_at
   `;
-  return rows[0];
+  return (rows as unknown as Condition[])[0];
 }
 
 export async function upsertUser(data: {
@@ -114,7 +126,8 @@ export async function upsertUser(data: {
   name: string | null;
   email: string;
   image: string | null;
-}) {
+}): Promise<User> {
+  const sql = getSql();
   const rows = await sql`
     INSERT INTO users (id, name, email, image)
     VALUES (${data.id}, ${data.name}, ${data.email}, ${data.image})
@@ -124,10 +137,11 @@ export async function upsertUser(data: {
           image = EXCLUDED.image
     RETURNING id, name, email, image, created_at
   `;
-  return rows[0];
+  return (rows as unknown as User[])[0];
 }
 
-export async function getConditionsByUserId(userId: string) {
+export async function getConditionsByUserId(userId: string): Promise<(Condition & { location_name: string })[]> {
+  const sql = getSql();
   const rows = await sql`
     SELECT
       c.id,
@@ -144,5 +158,5 @@ export async function getConditionsByUserId(userId: string) {
     WHERE c.user_id = ${userId}
     ORDER BY c.created_at DESC
   `;
-  return rows;
+  return rows as unknown as (Condition & { location_name: string })[];
 }

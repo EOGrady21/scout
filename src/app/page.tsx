@@ -1,18 +1,15 @@
-import dynamic from "next/dynamic";
 import { getLocations } from "@/lib/db";
 import LocationCard from "@/components/LocationCard";
+import MapWrapper from "@/components/MapWrapper";
+import Link from "next/link";
 import { Location } from "@/types";
-
-// Leaflet requires browser APIs — must be client-side only
-const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export const revalidate = 60;
 
 export default async function HomePage() {
   let locations: Location[] = [];
   try {
-    const rows = await getLocations();
-    locations = rows as unknown as Location[];
+    locations = await getLocations();
   } catch {
     // DB may not be configured during development
   }
@@ -21,7 +18,7 @@ export default async function HomePage() {
     <div className="flex flex-col lg:flex-row h-[calc(100vh-3.5rem)]">
       {/* Map panel */}
       <div className="flex-1 relative">
-        <Map locations={locations} />
+        <MapWrapper locations={locations} />
       </div>
 
       {/* Sidebar */}
@@ -36,9 +33,9 @@ export default async function HomePage() {
           {locations.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">
               No locations yet.{" "}
-              <a href="/submit" className="text-scout-green hover:underline">
+              <Link href="/submit" className="text-scout-green hover:underline">
                 Be the first to add one!
-              </a>
+              </Link>
             </p>
           ) : (
             locations.map((location) => (

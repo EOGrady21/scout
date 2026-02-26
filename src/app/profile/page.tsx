@@ -11,20 +11,10 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user) redirect("/");
 
-  let conditions: Array<{
-    id: string;
-    location_id: string;
-    condition_date: string;
-    rating: number;
-    description: string;
-    photo_url: string | null;
-    created_at: string;
-    location_name: string;
-  }> = [];
+  let conditions: (import("@/types").Condition & { location_name: string })[] = [];
 
   try {
-    const rows = await getConditionsByUserId(session.user.id!);
-    conditions = rows as typeof conditions;
+    conditions = await getConditionsByUserId(session.user.id!);
   } catch {
     // DB may not be configured during development
   }

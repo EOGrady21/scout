@@ -1,6 +1,6 @@
 # 🏕️ Scout
 
-A community-driven platform for discovering and sharing outdoor location conditions. Built with Next.js 14, Leaflet/OpenStreetMap, Auth.js (Google OAuth), Neon PostgreSQL (PostGIS), and Cloudinary.
+A community-driven platform for discovering and sharing outdoor location conditions. Built with Next.js 15, Leaflet/OpenStreetMap, Auth.js (Google OAuth), Neon PostgreSQL (PostGIS), and Cloudinary.
 
 ## Features
 
@@ -16,7 +16,7 @@ A community-driven platform for discovering and sharing outdoor location conditi
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Map | Leaflet + react-leaflet + OpenStreetMap |
