@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "db:setup": "npx tsx scripts/db-setup.ts"
+    "db:migrate": "npx tsx src/db/migrate.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.3",
