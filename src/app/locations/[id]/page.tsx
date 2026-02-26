@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { getLocationById, getConditionsByLocationId } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import ConditionForm from "@/components/ConditionForm";
-import { Condition, RATING_LABELS } from "@/types";
+import { Condition, Location, RATING_LABELS } from "@/types";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const revalidate = 0;
@@ -28,13 +29,14 @@ function RatingBadge({ rating }: { rating: number }) {
 }
 
 export default async function LocationPage({ params }: PageProps) {
-  let location: Awaited<ReturnType<typeof getLocationById>> | null = null;
-  let conditionRows: Awaited<ReturnType<typeof getConditionsByLocationId>> = [];
+  const { id } = await params;
+  let location: Location | null = null;
+  let conditions: Condition[] = [];
 
   try {
-    [location, conditionRows] = await Promise.all([
-      getLocationById(params.id),
-      getConditionsByLocationId(params.id),
+    [location, conditions] = await Promise.all([
+      getLocationById(id),
+      getConditionsByLocationId(id),
     ]);
   } catch {
     // DB unavailable — notFound will handle the null case below
@@ -43,7 +45,6 @@ export default async function LocationPage({ params }: PageProps) {
   if (!location) notFound();
 
   const session = await auth();
-  const conditions = conditionRows as unknown as Condition[];
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -128,13 +129,13 @@ export default async function LocationPage({ params }: PageProps) {
           Add a Condition Report
         </h2>
         {session ? (
-          <ConditionForm locationId={params.id} />
+          <ConditionForm locationId={id} />
         ) : (
           <p className="text-gray-500 text-sm">
             Please{" "}
-            <a href="/" className="text-scout-green hover:underline font-medium">
+            <Link href="/" className="text-scout-green hover:underline font-medium">
               sign in
-            </a>{" "}
+            </Link>{" "}
             to submit a condition report.
           </p>
         )}
