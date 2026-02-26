@@ -50,7 +50,15 @@ Fill in the values in `.env.local` (see [Environment Variables](#environment-var
 
 ### 4. Set up the database
 
-Run the SQL schema against your Neon PostgreSQL database:
+Create a [Neon](https://neon.tech) project (free tier is sufficient) and copy the connection string into `DATABASE_URL` in your `.env.local`. Then run the setup script to apply the schema:
+
+```bash
+npm run db:setup
+```
+
+This executes `src/db/schema.sql` against your Neon database, enabling the PostGIS extension and creating all required tables and indexes.
+
+Alternatively, you can apply the schema directly with `psql`:
 
 ```bash
 psql "$DATABASE_URL" -f src/db/schema.sql
