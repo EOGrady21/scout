@@ -14,7 +14,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user.email) return false;
       try {
         await upsertUser({
-          id: user.id ?? user.email,
+          id: user.id!,
           name: user.name ?? null,
           email: user.email,
           image: user.image ?? null,
