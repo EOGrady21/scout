@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocations, createLocation, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import {
+  addRateLimitHeaders,
+  applyRateLimit,
+  RATE_LIMIT_CONFIG,
+  rateLimitExceededResponse,
+} from "@/lib/rate-limit";
 
 export async function GET() {
   try {
@@ -21,6 +27,19 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rateLimit = applyRateLimit({
+    request,
+    namespace: "locations",
+    limit: RATE_LIMIT_CONFIG.locations.limit,
+    windowMs: RATE_LIMIT_CONFIG.locations.windowMs,
+    userId: session.user.id,
+  });
+
+  if (!rateLimit.allowed) {
+    return rateLimitExceededResponse(rateLimit);
+  }
+
    // Ensure FK parent row exists in users (prod-safe for stale sessions)
   if (!session.user.email) {
     return NextResponse.json(
@@ -72,12 +91,12 @@ export async function POST(request: NextRequest) {
     });
 
     const { created_by, ...safeLocation } = location;
-    return NextResponse.json(safeLocation, { status: 201 });
+    return addRateLimitHeaders(NextResponse.json(safeLocation, { status: 201 }), rateLimit);
   } catch (err) {
     console.error("POST /api/locations error:", err);
-    return NextResponse.json(
+    return addRateLimitHeaders(NextResponse.json(
       { error: "Failed to create location" },
       { status: 500 }
-    );
+    ), rateLimit);
   }
 }
