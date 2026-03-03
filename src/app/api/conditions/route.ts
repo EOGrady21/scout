@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createCondition } from "@/lib/db";
+import { createCondition, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -7,6 +7,20 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+   // Ensure FK parent row exists in users (prod-safe for stale sessions)
+  if (!session.user.email) {
+    return NextResponse.json(
+      { error: "Missing user email in session" },
+      { status: 400 }
+    );
+  }
+
+  await upsertUser({
+    id: session.user.id,
+    name: session.user.name ?? null,
+    email: session.user.email,
+    image: session.user.image ?? null,
+  });
 
   try {
     const body = await request.json();
