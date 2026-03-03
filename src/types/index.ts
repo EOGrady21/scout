@@ -12,7 +12,7 @@ export interface Location {
   description: string;
   latitude: number;
   longitude: number;
-  created_by: string;
+  created_by?: string;
   created_at: string;
   condition_count?: number;
   latest_rating?: number | null;
@@ -21,7 +21,7 @@ export interface Location {
 export interface Condition {
   id: string;
   location_id: string;
-  user_id: string;
+  user_id?: string;
   condition_date: string;
   rating: 1 | 2 | 3 | 4 | 5;
   description: string;

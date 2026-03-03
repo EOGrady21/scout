@@ -13,10 +13,16 @@ async function migrate() {
 
   const sql = neon(url);
   const schema = readFileSync(join(__dirname, "schema.sql"), "utf-8");
+  const statements = schema
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean);
 
   console.log("Running database migrations...");
   try {
-    await sql(schema);
+    for (const statement of statements) {
+      await sql(statement);
+    }
   } catch (err) {
     console.error("Migration failed while executing schema.sql:", err);
     throw err;

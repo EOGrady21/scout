@@ -13,7 +13,9 @@ export async function GET(
     }
 
     const conditions = await getConditionsByLocationId(id);
-    return NextResponse.json({ ...location, conditions });
+    const { created_by, ...safeLocation } = location;
+    const safeConditions = conditions.map(({ user_id, ...condition }) => condition);
+    return NextResponse.json({ ...safeLocation, conditions: safeConditions });
   } catch (err) {
     console.error("GET /api/locations/[id] error:", err);
     return NextResponse.json(

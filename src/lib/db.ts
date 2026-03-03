@@ -22,7 +22,6 @@ export async function getLocations(): Promise<Location[]> {
       l.description,
       l.latitude,
       l.longitude,
-      l.created_by,
       l.created_at,
       COUNT(c.id)::int AS condition_count,
       AVG(c.rating)::float AS latest_rating
@@ -43,7 +42,6 @@ export async function getLocationById(id: string): Promise<Location | null> {
       l.description,
       l.latitude,
       l.longitude,
-      l.created_by,
       l.created_at
     FROM locations l
     WHERE l.id = ${id}
@@ -57,7 +55,6 @@ export async function getConditionsByLocationId(locationId: string): Promise<Con
     SELECT
       c.id,
       c.location_id,
-      c.user_id,
       c.condition_date,
       c.rating,
       c.description,
@@ -128,16 +125,42 @@ export async function upsertUser(data: {
   image: string | null;
 }): Promise<User> {
   const sql = getSql();
-  const rows = await sql`
-    INSERT INTO users (id, name, email, image)
-    VALUES (${data.id}, ${data.name}, ${data.email}, ${data.image})
-    ON CONFLICT (id) DO UPDATE
-      SET name  = EXCLUDED.name,
-          email = EXCLUDED.email,
-          image = EXCLUDED.image
-    RETURNING id, name, email, image, created_at
-  `;
-  return (rows as unknown as User[])[0];
+  try {
+    const rows = await sql`
+      INSERT INTO users (id, name, email, image)
+      VALUES (${data.id}, ${data.name}, ${data.email}, ${data.image})
+      ON CONFLICT (id) DO UPDATE
+        SET name  = EXCLUDED.name,
+            email = EXCLUDED.email,
+            image = EXCLUDED.image
+      RETURNING id, name, email, image, created_at
+    `;
+    return (rows as unknown as User[])[0];
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const emailConflict =
+      message.includes("users_email_key") ||
+      message.toLowerCase().includes("duplicate key value") &&
+        message.toLowerCase().includes("email");
+
+    if (!emailConflict) {
+      throw err;
+    }
+
+    const rows = await sql`
+      UPDATE users
+      SET name = ${data.name},
+          image = ${data.image}
+      WHERE email = ${data.email}
+      RETURNING id, name, email, image, created_at
+    `;
+
+    const existing = (rows as unknown as User[])[0];
+    if (!existing) {
+      throw err;
+    }
+    return existing;
+  }
 }
 
 export async function getConditionsByUserId(userId: string): Promise<(Condition & { location_name: string })[]> {

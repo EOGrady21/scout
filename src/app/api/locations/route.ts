@@ -5,7 +5,8 @@ import { auth } from "@/lib/auth";
 export async function GET() {
   try {
     const locations = await getLocations();
-    return NextResponse.json(locations);
+    const safeLocations = locations.map(({ created_by, ...location }) => location);
+    return NextResponse.json(safeLocations);
   } catch (err) {
     console.error("GET /api/locations error:", err);
     return NextResponse.json(
@@ -27,15 +28,14 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-
-  await upsertUser({
-    id: session.user.id,
-    name: session.user.name ?? null,
-    email: session.user.email,
-    image: session.user.image ?? null,
-  });
-
   try {
+    const user = await upsertUser({
+      id: session.user.id,
+      name: session.user.name ?? null,
+      email: session.user.email,
+      image: session.user.image ?? null,
+    });
+
     const body = await request.json();
     const { name, description, latitude, longitude } = body;
 
@@ -63,14 +63,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-
-
     const location = await createLocation({
       name: String(name).trim(),
       description: String(description).trim(),
       latitude: lat,
       longitude: lon,
-      created_by: session.user.id,
+      created_by: user.id,
     });
 
     return NextResponse.json(location, { status: 201 });

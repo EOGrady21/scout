@@ -1,5 +1,6 @@
 -- Enable PostGIS extension
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Users table
 CREATE TABLE IF NOT EXISTS users (

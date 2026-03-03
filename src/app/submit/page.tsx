@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type SubmitLocationResponse = {
+  id?: string | number;
+  error?: string;
+};
+
 export default function SubmitPage() {
   const router = useRouter();
 
@@ -12,6 +17,19 @@ export default function SubmitPage() {
   const [longitude, setLongitude] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function parseResponseBody(
+    response: Response
+  ): Promise<SubmitLocationResponse | null> {
+    const text = await response.text();
+    if (!text) return null;
+
+    try {
+      return JSON.parse(text) as SubmitLocationResponse;
+    } catch {
+      return null;
+    }
+  }
 
   function useMyLocation() {
     if (!navigator.geolocation) {
@@ -39,13 +57,17 @@ export default function SubmitPage() {
         body: JSON.stringify({ name, description, latitude, longitude }),
       });
 
+      const data = await parseResponseBody(res);
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to submit location");
+        throw new Error(data?.error ?? `Failed to submit location (${res.status})`);
       }
 
-      const location = await res.json();
-      router.push(`/locations/${location.id}`);
+      if (!data?.id) {
+        throw new Error("Location created but server returned an unexpected response.");
+      }
+
+      router.push(`/locations/${data.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setSubmitting(false);

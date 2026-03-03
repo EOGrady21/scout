@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "db:setup": "npx tsx scripts/db-setup.ts",
     "db:migrate": "npx tsx src/db/migrate.ts"
   },
   "dependencies": {
+    "@cloudinary/react": "^1.14.4",
+    "@cloudinary/url-gen": "^1.22.0",
     "@neondatabase/serverless": "^0.9.3",
     "cloudinary": "^2.3.0",
     "leaflet": "^1.9.4",
