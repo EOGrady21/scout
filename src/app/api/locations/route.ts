@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
       created_by: user.id,
     });
 
-    return NextResponse.json(location, { status: 201 });
+    const { created_by, ...safeLocation } = location;
+    return NextResponse.json(safeLocation, { status: 201 });
   } catch (err) {
     console.error("POST /api/locations error:", err);
     return NextResponse.json(

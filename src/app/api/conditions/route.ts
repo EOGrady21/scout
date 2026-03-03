@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       photo_url: photo_url ? String(photo_url) : null,
     });
 
-    return NextResponse.json(condition, { status: 201 });
+    const { user_id, ...safeCondition } = condition;
+    return NextResponse.json(safeCondition, { status: 201 });
   } catch (err) {
     console.error("POST /api/conditions error:", err);
     return NextResponse.json(
