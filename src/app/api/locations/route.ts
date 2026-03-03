@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLocations, createLocation } from "@/lib/db";
+import { getLocations, createLocation, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -48,6 +48,13 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    await upsertUser({
+      id: session.user.id,
+      email: session.user.email ?? "",
+      name: session.user.name ?? null,
+      image: session.user.image ?? null,
+    });
 
     const location = await createLocation({
       name: String(name).trim(),
