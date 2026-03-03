@@ -1,12 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCondition, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import {
+  addRateLimitHeaders,
+  applyRateLimit,
+  RATE_LIMIT_CONFIG,
+  rateLimitExceededResponse,
+} from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rateLimit = applyRateLimit({
+    request,
+    namespace: "conditions",
+    limit: RATE_LIMIT_CONFIG.conditions.limit,
+    windowMs: RATE_LIMIT_CONFIG.conditions.windowMs,
+    userId: session.user.id,
+  });
+
+  if (!rateLimit.allowed) {
+    return rateLimitExceededResponse(rateLimit);
+  }
+
    // Ensure FK parent row exists in users (prod-safe for stale sessions)
   if (!session.user.email) {
     return NextResponse.json(
@@ -51,12 +70,12 @@ export async function POST(request: NextRequest) {
     });
 
     const { user_id, ...safeCondition } = condition;
-    return NextResponse.json(safeCondition, { status: 201 });
+    return addRateLimitHeaders(NextResponse.json(safeCondition, { status: 201 }), rateLimit);
   } catch (err) {
     console.error("POST /api/conditions error:", err);
-    return NextResponse.json(
+    return addRateLimitHeaders(NextResponse.json(
       { error: "Failed to submit condition" },
       { status: 500 }
-    );
+    ), rateLimit);
   }
 }

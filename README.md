@@ -85,6 +85,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (public/client-side) |
+| `RATE_LIMIT_UPLOAD_MAX` | Max `POST /api/upload` requests per window (default: `10`) |
+| `RATE_LIMIT_UPLOAD_WINDOW_MS` | Window in ms for upload limit (default: `60000`) |
+| `RATE_LIMIT_CONDITIONS_MAX` | Max `POST /api/conditions` requests per window (default: `20`) |
+| `RATE_LIMIT_CONDITIONS_WINDOW_MS` | Window in ms for conditions limit (default: `300000`) |
+| `RATE_LIMIT_LOCATIONS_MAX` | Max `POST /api/locations` requests per window (default: `10`) |
+| `RATE_LIMIT_LOCATIONS_WINDOW_MS` | Window in ms for locations limit (default: `600000`) |
 
 ### Getting credentials
 

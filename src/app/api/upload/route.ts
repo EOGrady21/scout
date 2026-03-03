@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
+import {
+  addRateLimitHeaders,
+  applyRateLimit,
+  RATE_LIMIT_CONFIG,
+  rateLimitExceededResponse,
+} from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -8,6 +14,18 @@ export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimit = applyRateLimit({
+    request,
+    namespace: "upload",
+    limit: RATE_LIMIT_CONFIG.upload.limit,
+    windowMs: RATE_LIMIT_CONFIG.upload.windowMs,
+    userId: session.user.id,
+  });
+
+  if (!rateLimit.allowed) {
+    return rateLimitExceededResponse(rateLimit);
   }
 
   try {
@@ -38,12 +56,12 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const url = await uploadImage(buffer);
 
-    return NextResponse.json({ url });
+    return addRateLimitHeaders(NextResponse.json({ url }), rateLimit);
   } catch (err) {
     console.error("POST /api/upload error:", err);
-    return NextResponse.json(
+    return addRateLimitHeaders(NextResponse.json(
       { error: "Failed to upload image" },
       { status: 500 }
-    );
+    ), rateLimit);
   }
 }
