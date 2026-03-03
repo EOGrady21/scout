@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { getConditionsByUserId } from "@/lib/db";
+import { getConditionsByUserId, upsertUser } from "@/lib/db";
 import { RATING_LABELS } from "@/types";
 
 export const revalidate = 0;
@@ -14,7 +14,19 @@ export default async function ProfilePage() {
   let conditions: (import("@/types").Condition & { location_name: string })[] = [];
 
   try {
-    conditions = await getConditionsByUserId(session.user.id!);
+    let queryUserId = session.user.id!;
+
+    if (session.user.email) {
+      const user = await upsertUser({
+        id: session.user.id!,
+        name: session.user.name ?? null,
+        email: session.user.email,
+        image: session.user.image ?? null,
+      });
+      queryUserId = user.id;
+    }
+
+    conditions = await getConditionsByUserId(queryUserId);
   } catch {
     // DB may not be configured during development
   }

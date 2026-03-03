@@ -15,14 +15,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await upsertUser({
-    id: session.user.id,
-    name: session.user.name ?? null,
-    email: session.user.email,
-    image: session.user.image ?? null,
-  });
-
   try {
+    const user = await upsertUser({
+      id: session.user.id,
+      name: session.user.name ?? null,
+      email: session.user.email,
+      image: session.user.image ?? null,
+    });
+
     const body = await request.json();
     const { location_id, condition_date, rating, description, photo_url } = body;
 
@@ -43,14 +43,15 @@ export async function POST(request: NextRequest) {
 
     const condition = await createCondition({
       location_id: String(location_id),
-      user_id: session.user.id,
+      user_id: user.id,
       condition_date: String(condition_date),
       rating: ratingNum,
       description: String(description).trim(),
       photo_url: photo_url ? String(photo_url) : null,
     });
 
-    return NextResponse.json(condition, { status: 201 });
+    const { user_id, ...safeCondition } = condition;
+    return NextResponse.json(safeCondition, { status: 201 });
   } catch (err) {
     console.error("POST /api/conditions error:", err);
     return NextResponse.json(
