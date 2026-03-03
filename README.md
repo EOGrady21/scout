@@ -161,3 +161,13 @@ A GIST index on `locations.geom` enables fast bounding-box and nearest-neighbour
 MIT
 DRAFT: A community conditions platform where you can scout your next adventure
 
+
+## Development TODO List
+
+- Add map pin drop selection tool to submit a new location
+- move condition report to top of page when looking at a location
+- add badges to profiles
+- add one verified location demo
+- add location badges
+- 
+- business profile option
