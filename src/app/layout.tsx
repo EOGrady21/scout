@@ -9,14 +9,10 @@ export const metadata: Metadata = {
     "Community-driven platform for discovering and sharing outdoor location conditions.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="font-sans bg-gray-50 min-h-screen">
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans bg-gray-50 min-h-screen" suppressHydrationWarning>
         <SessionProvider>
           <Header />
           <main>{children}</main>
