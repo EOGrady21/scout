@@ -3,12 +3,14 @@ import LocationCard from "@/components/LocationCard";
 import MapWrapper from "@/components/MapWrapper";
 import Link from "next/link";
 import { Location } from "@/types";
-import SubmitPage from "@/app/submit/page";
+import { auth } from "@/lib/auth";
+import SignInButton from "@/components/SignInButton";
 
 
 export const revalidate = 60;
 
 export default async function HomePage() {
+  const session = await auth();
   let locations: Location[] = [];
   try {
     locations = await getLocations();
@@ -23,11 +25,10 @@ return (
     <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 sticky top-0 h-full overflow-hidden p-4">
       <nav>
         <ul className="space-y-2">
-          <li><a href="#my-home"            className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">My Home</a></li>
-          <li><a href="#trending-locations" className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Trending Locations</a></li>
-          <li><a href="#map-view"           className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Map View</a></li>
-          <li><a href="#conditions"         className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Conditions</a></li>
-          <li><a href="#add-new-trail"       className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add New Trail</a></li>
+          <li><a href="#main-page"            className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">My Home</a></li>
+          <li><a href="#conditions"           className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Conditions</a></li>
+          <li><a href="#map-view"             className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Map View</a></li>
+          <li><a href="#add-trail-report"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add a Trail Report</a></li>
         </ul>
       </nav>
     </aside>
@@ -35,13 +36,14 @@ return (
     {/* ===== SCROLLABLE MAIN CONTENT ===== */}
     <div className="flex-1 overflow-y-auto">
 
-      <section id="my-home" className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold mb-4">My Home</h2>
+      <section id="main-page" className="p-6 border-b border-gray-200">
+        <h2 className="text-xl font-bold mb-4">Welcome Scout!</h2>
+        <p>Review trails and outdoor spaces in your community in our web app. Sign in to get started. Your adventure awaits!</p>
         {/* Your content here */}
       </section>
 
-      <section id="trending-locations" className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold mb-4">Trending Locations</h2>
+      <section id="conditions" className="p-6 border-b border-gray-200">
+        <h2 className="text-xl font-bold mb-4">Conditions</h2>
         {/* Location cards from the database go here */}
         <div className="space-y-3">
           {locations.length === 0 ? (
@@ -62,13 +64,23 @@ return (
         </div>
       </section>
 
-      <section id="conditions" className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold mb-4">Conditions</h2>
-        {/* Your content here */}
-      </section>
-
-      <section id="add-new-trail" className="p-6">
-        <SubmitPage />
+      <section id="add-trail-report" className="p-6">
+        <h2 className="text-xl font-bold mb-4">Add a Trail Report</h2>
+        {!session ? (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
+            <p className="text-gray-600">
+              You must be logged in with Google to submit a trail report.
+            </p>
+            <SignInButton />
+          </div>
+        ) : (
+          <Link
+            href="/submit"
+            className="inline-block bg-[#0b6038] text-white px-6 py-2 rounded hover:bg-[#094d2c] transition-colors font-medium"
+          >
+            Add a Trail Report
+          </Link>
+        )}
       </section>
 
     </div>
