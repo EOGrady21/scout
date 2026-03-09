@@ -2,7 +2,14 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { getConditionsByUserId, upsertUser } from "@/lib/db";
+import {
+  getConditionsByUserId,
+  getUserBadgeProgress,
+  upsertBadgeCatalog,
+  upsertUser,
+  upsertUserBadgeProgress,
+} from "@/lib/db";
+import { BADGE_DEFINITIONS, getBadgeProgress } from "@/lib/badges";
 import { RATING_LABELS } from "@/types";
 
 export const revalidate = 0;
@@ -11,11 +18,11 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user) redirect("/");
 
+  let queryUserId = session.user.id!;
   let conditions: (import("@/types").Condition & { location_name: string })[] = [];
+  let badges = getBadgeProgress([]);
 
   try {
-    let queryUserId = session.user.id!;
-
     if (session.user.email) {
       const user = await upsertUser({
         id: session.user.id!,
@@ -27,8 +34,14 @@ export default async function ProfilePage() {
     }
 
     conditions = await getConditionsByUserId(queryUserId);
+
+    const computedBadges = getBadgeProgress(conditions);
+    await upsertBadgeCatalog(BADGE_DEFINITIONS);
+    await upsertUserBadgeProgress(queryUserId, computedBadges);
+    badges = await getUserBadgeProgress(queryUserId);
   } catch {
     // DB may not be configured during development
+    badges = getBadgeProgress(conditions);
   }
 
   return (
@@ -50,6 +63,50 @@ export default async function ProfilePage() {
           </h1>
           <p className="text-gray-500 text-sm">{session.user.email}</p>
         </div>
+      </div>
+
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Your Badges</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {badges.map((badge) => (
+          <div
+            key={badge.id}
+            className={`rounded-xl border p-4 transition ${
+              badge.earned
+                ? "bg-white border-scout-green/30 shadow-sm"
+                : "bg-gray-50 border-gray-200"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <Image
+                src={`/${badge.iconPath}`}
+                alt={badge.name}
+                width={48}
+                height={48}
+                className={badge.earned ? "" : "grayscale opacity-60"}
+              />
+              <div className="min-w-0">
+                <p className="font-semibold text-gray-900">{badge.name}</p>
+                <p className="text-xs text-gray-500">{badge.description}</p>
+                <p className="text-xs mt-2 text-gray-600">
+                  Progress: {Math.min(badge.current, badge.target)}/{badge.target}
+                </p>
+                {badge.earnedAt ? (
+                  <p className="text-xs mt-1 text-scout-green font-medium">
+                    Earned on {new Date(badge.earnedAt).toLocaleDateString("en-US")}
+                  </p>
+                ) : (
+                  <p className="text-xs mt-1 text-gray-400">Not earned yet</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+              <div
+                className={`h-full ${badge.earned ? "bg-scout-green" : "bg-gray-400"}`}
+                style={{ width: `${badge.percent}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Condition history */}

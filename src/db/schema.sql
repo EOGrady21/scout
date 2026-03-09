@@ -35,6 +35,28 @@ CREATE TABLE IF NOT EXISTS conditions (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Badge catalog table
+CREATE TABLE IF NOT EXISTS badges (
+  id          TEXT        PRIMARY KEY,
+  name        TEXT        NOT NULL,
+  description TEXT        NOT NULL,
+  icon_path   TEXT        NOT NULL,
+  metric      TEXT        NOT NULL,
+  target      INTEGER     NOT NULL CHECK (target > 0),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Per-user badge progress and earned state
+CREATE TABLE IF NOT EXISTS user_badges (
+  user_id       TEXT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  badge_id      TEXT        NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
+  current_value INTEGER     NOT NULL DEFAULT 0 CHECK (current_value >= 0),
+  earned        BOOLEAN     NOT NULL DEFAULT FALSE,
+  earned_at     TIMESTAMPTZ,
+  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, badge_id)
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_locations_geom
   ON locations USING GIST (geom);
@@ -50,3 +72,9 @@ CREATE INDEX IF NOT EXISTS idx_conditions_user_id
 
 CREATE INDEX IF NOT EXISTS idx_conditions_condition_date
   ON conditions (condition_date DESC);
+
+CREATE INDEX IF NOT EXISTS idx_user_badges_user_id
+  ON user_badges (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_badges_earned
+  ON user_badges (earned);

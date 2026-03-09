@@ -1,5 +1,6 @@
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
 import type { Location, Condition, User } from "@/types";
+import type { BadgeDefinition, BadgeMetric, BadgeProgress } from "@/lib/badges";
 
 // Lazily initialise the Neon client so the module can be imported at build
 // time even when DATABASE_URL is not yet set (e.g. during `next build` CI).
@@ -182,4 +183,102 @@ export async function getConditionsByUserId(userId: string): Promise<(Condition 
     ORDER BY c.created_at DESC
   `;
   return rows as unknown as (Condition & { location_name: string })[];
+}
+
+export async function upsertBadgeCatalog(badges: BadgeDefinition[]): Promise<void> {
+  const sql = getSql();
+
+  for (const badge of badges) {
+    await sql`
+      INSERT INTO badges (id, name, description, icon_path, metric, target)
+      VALUES (
+        ${badge.id},
+        ${badge.name},
+        ${badge.description},
+        ${badge.iconPath},
+        ${badge.metric},
+        ${badge.target}
+      )
+      ON CONFLICT (id) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        description = EXCLUDED.description,
+        icon_path = EXCLUDED.icon_path,
+        metric = EXCLUDED.metric,
+        target = EXCLUDED.target
+    `;
+  }
+}
+
+export async function upsertUserBadgeProgress(
+  userId: string,
+  badges: BadgeProgress[],
+): Promise<void> {
+  const sql = getSql();
+
+  for (const badge of badges) {
+    await sql`
+      INSERT INTO user_badges (user_id, badge_id, current_value, earned, earned_at)
+      VALUES (
+        ${userId},
+        ${badge.id},
+        ${badge.current},
+        ${badge.earned},
+        ${badge.earnedAt}
+      )
+      ON CONFLICT (user_id, badge_id) DO UPDATE
+      SET
+        current_value = EXCLUDED.current_value,
+        earned = EXCLUDED.earned,
+        earned_at = CASE
+          WHEN user_badges.earned_at IS NOT NULL THEN user_badges.earned_at
+          ELSE EXCLUDED.earned_at
+        END,
+        updated_at = NOW()
+    `;
+  }
+}
+
+export async function getUserBadgeProgress(userId: string): Promise<BadgeProgress[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      b.id,
+      b.name,
+      b.description,
+      b.icon_path,
+      b.metric,
+      b.target,
+      COALESCE(ub.current_value, 0)::int AS current,
+      COALESCE(ub.earned, FALSE) AS earned,
+      ub.earned_at
+    FROM badges b
+    LEFT JOIN user_badges ub
+      ON ub.badge_id = b.id
+      AND ub.user_id = ${userId}
+    ORDER BY b.id
+  `;
+
+  return (rows as unknown as Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon_path: string;
+    metric: BadgeMetric;
+    target: number;
+    current: number;
+    earned: boolean;
+    earned_at: string | null;
+  }>).map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    iconPath: row.icon_path,
+    metric: row.metric,
+    target: row.target,
+    current: row.current,
+    earned: row.earned,
+    percent: Math.min(100, Math.round((row.current / row.target) * 100)),
+    earnedAt: row.earned_at,
+  }));
 }
