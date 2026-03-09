@@ -10,5 +10,5 @@ const ClientMap = dynamic(() => import("@/components/Map"), {
 });
 
 export default function MapWrapper({ locations }: { locations: Location[] }) {
-  return <ClientMap locations={locations} />;
+  return <ClientMap initialLocations={locations} />;
 }

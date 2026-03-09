@@ -15,7 +15,34 @@ function getSql(): NeonQueryFunction<false, false> {
 }
 
 export async function getLocations(): Promise<Location[]> {
+  return getLocationsWithFilters();
+}
+
+type LocationFilters = {
+  south?: number;
+  north?: number;
+  west?: number;
+  east?: number;
+  tags?: string[];
+  query?: string;
+};
+
+export async function getLocationsWithFilters(filters: LocationFilters = {}): Promise<Location[]> {
   const sql = getSql();
+  const {
+    south,
+    north,
+    west,
+    east,
+    tags,
+    query,
+  } = filters;
+
+  const hasLongitudeBounds = typeof west === "number" && typeof east === "number";
+  const crossesAntimeridian = hasLongitudeBounds && west > east;
+  const keywordPattern = query ? `%${query}%` : null;
+  const normalizedTags = tags && tags.length > 0 ? Array.from(new Set(tags)) : null;
+
   const rows = await sql`
     SELECT
       l.id,
@@ -28,6 +55,34 @@ export async function getLocations(): Promise<Location[]> {
       AVG(c.rating)::float AS latest_rating
     FROM locations l
     LEFT JOIN conditions c ON c.location_id = l.id
+    WHERE (${south ?? null}::float8 IS NULL OR l.latitude >= ${south ?? null})
+      AND (${north ?? null}::float8 IS NULL OR l.latitude <= ${north ?? null})
+      AND (
+        ${west ?? null}::float8 IS NULL
+        OR ${east ?? null}::float8 IS NULL
+        OR (
+          ${crossesAntimeridian}
+          AND (l.longitude >= ${west ?? null} OR l.longitude <= ${east ?? null})
+        )
+        OR (
+          NOT ${crossesAntimeridian}
+          AND l.longitude BETWEEN ${west ?? null} AND ${east ?? null}
+        )
+      )
+      AND (
+        ${normalizedTags}::text[] IS NULL
+        OR EXISTS (
+          SELECT 1
+          FROM conditions c2
+          WHERE c2.location_id = l.id
+            AND c2.tags && ${normalizedTags}::text[]
+        )
+      )
+      AND (
+        ${keywordPattern}::text IS NULL
+        OR l.name ILIKE ${keywordPattern}
+        OR l.description ILIKE ${keywordPattern}
+      )
     GROUP BY l.id
     ORDER BY l.created_at DESC
   `;
