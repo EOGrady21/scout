@@ -161,6 +161,18 @@ export default async function ProfilePage() {
                 })}
               </p>
               <p className="text-gray-600 text-sm">{c.description}</p>
+              {c.tags && c.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {c.tags.map((tag) => (
+                    <span
+                      key={`${c.id}-${tag}`}
+                      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               {c.photo_url && (
                 <div className="mt-3 relative h-40 rounded-lg overflow-hidden">
                   <Image

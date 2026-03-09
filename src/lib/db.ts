@@ -60,6 +60,7 @@ export async function getConditionsByLocationId(locationId: string): Promise<Con
       c.rating,
       c.description,
       c.photo_url,
+      c.tags,
       c.created_at,
       u.name AS user_name,
       u.image AS user_image
@@ -102,19 +103,21 @@ export async function createCondition(data: {
   rating: number;
   description: string;
   photo_url: string | null;
+  tags: string[];
 }): Promise<Condition> {
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO conditions (location_id, user_id, condition_date, rating, description, photo_url)
+    INSERT INTO conditions (location_id, user_id, condition_date, rating, description, photo_url, tags)
     VALUES (
       ${data.location_id},
       ${data.user_id},
       ${data.condition_date},
       ${data.rating},
       ${data.description},
-      ${data.photo_url}
+      ${data.photo_url},
+      ${data.tags}
     )
-    RETURNING id, location_id, user_id, condition_date, rating, description, photo_url, created_at
+    RETURNING id, location_id, user_id, condition_date, rating, description, photo_url, tags, created_at
   `;
   return (rows as unknown as Condition[])[0];
 }
@@ -175,6 +178,7 @@ export async function getConditionsByUserId(userId: string): Promise<(Condition 
       c.rating,
       c.description,
       c.photo_url,
+      c.tags,
       c.created_at,
       l.name AS location_name
     FROM conditions c

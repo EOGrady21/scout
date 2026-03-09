@@ -26,6 +26,7 @@ export interface Condition {
   rating: 1 | 2 | 3 | 4 | 5;
   description: string;
   photo_url: string | null;
+  tags?: string[];
   created_at: string;
   user_name?: string | null;
   user_image?: string | null;

@@ -5,7 +5,8 @@ export type BadgeMetric =
 	| "uniqueLocations"
 	| "photoReports"
 	| "highRatings"
-	| "streakDays";
+	| "streakDays"
+	| "kidFriendlyReports";
 
 export interface BadgeDefinition {
 	id: string;
@@ -42,11 +43,11 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
 	},
 	{
 		id: "field-researcher",
-		name: "Field Researcher",
-		description: "Submit 20 condition reports.",
+		name: "Playground Scout",
+		description: "Submit 3 reports tagged kid-friendly.",
 		iconPath: "badges/3.svg",
-		metric: "reports",
-		target: 20,
+		metric: "kidFriendlyReports",
+		target: 3,
 	},
 	{
 		id: "community-observer",
@@ -114,6 +115,10 @@ function getMetricCount(metric: BadgeMetric, conditions: Condition[]): number {
 
 	if (metric === "highRatings") {
 		return conditions.filter((c) => c.rating >= 4).length;
+	}
+
+	if (metric === "kidFriendlyReports") {
+		return conditions.filter((c) => c.tags?.includes("kid-friendly")).length;
 	}
 
 	const uniqueDays = Array.from(new Set(conditions.map((c) => toDateKey(c.condition_date))))
@@ -184,6 +189,8 @@ function getEarnedAt(
 			count += condition.photo_url ? 1 : 0;
 		} else if (badge.metric === "highRatings") {
 			count += condition.rating >= 4 ? 1 : 0;
+		} else if (badge.metric === "kidFriendlyReports") {
+			count += condition.tags?.includes("kid-friendly") ? 1 : 0;
 		}
 
 		if (count >= badge.target) {

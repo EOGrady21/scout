@@ -10,6 +10,7 @@ function condition(overrides: Partial<Condition>): Condition {
     rating: overrides.rating ?? 3,
     description: overrides.description ?? "Report",
     photo_url: overrides.photo_url ?? null,
+    tags: overrides.tags ?? [],
     created_at: overrides.created_at ?? "2025-01-01T12:00:00.000Z",
     user_id: overrides.user_id,
     user_name: overrides.user_name,
@@ -42,6 +43,23 @@ describe("getBadgeProgress", () => {
     expect(first?.earned).toBe(true);
     expect(trail?.earned).toBe(true);
     expect(trail?.earnedAt).toBe("2025-01-05");
+  });
+
+  it("uses kid-friendly tag progress for playground scout badge", () => {
+    const reports = [
+      condition({ id: "1", tags: ["kid-friendly"], created_at: "2025-01-01T12:00:00.000Z" }),
+      condition({ id: "2", tags: ["muddy"], created_at: "2025-01-02T12:00:00.000Z" }),
+      condition({ id: "3", tags: ["kid-friendly"], created_at: "2025-01-03T12:00:00.000Z" }),
+      condition({ id: "4", tags: ["kid-friendly"], created_at: "2025-01-04T12:00:00.000Z" }),
+    ];
+
+    const badges = getBadgeProgress(reports);
+    const playground = badges.find((b) => b.id === "field-researcher");
+
+    expect(playground?.name).toBe("Playground Scout");
+    expect(playground?.current).toBe(3);
+    expect(playground?.earned).toBe(true);
+    expect(playground?.earnedAt).toBe("2025-01-04");
   });
 
   it("calculates unique location and photo/high-rating metrics", () => {

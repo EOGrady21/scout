@@ -32,8 +32,12 @@ CREATE TABLE IF NOT EXISTS conditions (
   rating         SMALLINT    NOT NULL CHECK (rating BETWEEN 1 AND 5),
   description    TEXT        NOT NULL,
   photo_url      TEXT,
+  tags           TEXT[]      NOT NULL DEFAULT '{}',
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE IF EXISTS conditions
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}';
 
 -- Badge catalog table
 CREATE TABLE IF NOT EXISTS badges (
@@ -72,6 +76,9 @@ CREATE INDEX IF NOT EXISTS idx_conditions_user_id
 
 CREATE INDEX IF NOT EXISTS idx_conditions_condition_date
   ON conditions (condition_date DESC);
+
+CREATE INDEX IF NOT EXISTS idx_conditions_tags
+  ON conditions USING GIN (tags);
 
 CREATE INDEX IF NOT EXISTS idx_user_badges_user_id
   ON user_badges (user_id);
