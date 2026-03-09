@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getLocationById, getConditionsByLocationId } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import ConditionForm from "@/components/ConditionForm";
+import LocationDetailMapWrapper from "@/components/LocationDetailMapWrapper";
 import { Condition, Location, RATING_LABELS } from "@/types";
 
 interface PageProps {
@@ -57,6 +58,13 @@ export default async function LocationPage({ params }: PageProps) {
         <p className="text-sm text-gray-400">
           {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
         </p>
+        <div className="mt-4 h-72 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+          <LocationDetailMapWrapper
+            latitude={location.latitude}
+            longitude={location.longitude}
+            name={location.name}
+          />
+        </div>
       </div>
 
       {/* Condition reports */}
