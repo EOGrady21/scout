@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
 type SubmitLocationResponse = {
   id?: string | number;
   error?: string;
 };
+
+const SubmitPinMap = dynamic(() => import("@/components/SubmitPinMap"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-gray-100" />,
+});
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -17,6 +23,28 @@ export default function SubmitPage() {
   const [longitude, setLongitude] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Seed the form with geolocation once so the map defaults to the user's position.
+    if (latitude || longitude) return;
+    if (!navigator.geolocation) return;
+
+    let isCancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (isCancelled) return;
+        setLatitude(pos.coords.latitude.toFixed(6));
+        setLongitude(pos.coords.longitude.toFixed(6));
+      },
+      () => {
+        // Keep a silent fallback to default map center if geolocation is denied/unavailable.
+      }
+    );
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [latitude, longitude]);
 
   async function parseResponseBody(
     response: Response
@@ -40,9 +68,16 @@ export default function SubmitPage() {
       (pos) => {
         setLatitude(pos.coords.latitude.toFixed(6));
         setLongitude(pos.coords.longitude.toFixed(6));
+        setError(null);
       },
       () => setError("Unable to retrieve your location.")
     );
+  }
+
+  function updateCoordinatesFromMap(lat: number, lon: number) {
+    setLatitude(lat.toFixed(6));
+    setLongitude(lon.toFixed(6));
+    setError(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -116,6 +151,22 @@ export default function SubmitPage() {
             placeholder="Describe the location..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-scout-green resize-none"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Drop a Pin
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Click on the map to place a pin. Drag the pin to refine the location.
+          </p>
+          <div className="h-72 rounded-lg overflow-hidden border border-gray-200">
+            <SubmitPinMap
+              latitude={latitude}
+              longitude={longitude}
+              onSelect={updateCoordinatesFromMap}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
