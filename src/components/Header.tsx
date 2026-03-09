@@ -13,24 +13,8 @@ export default async function Header() {
         </Link>
         <nav className="flex items-center gap-6 text-sm">
           <Link href="/" className="hover:text-scout-light transition-colors">
-            Map
+            Home
           </Link>
-          {session ? (
-            <>
-              <Link
-                href="/submit"
-                className="hover:text-scout-light transition-colors"
-              >
-                Submit Location
-              </Link>
-              <Link
-                href="/profile"
-                className="hover:text-scout-light transition-colors"
-              >
-                Profile
-              </Link>
-            </>
-          ) : null}
           <AuthButton session={session} />
         </nav>
       </div>
