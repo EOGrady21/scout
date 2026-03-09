@@ -32,6 +32,12 @@ export interface Condition {
   user_image?: string | null;
 }
 
+export interface RecentConditionFeedItem extends Condition {
+  location_name: string;
+  latitude: number;
+  longitude: number;
+}
+
 export interface LocationWithConditions extends Location {
   conditions: Condition[];
 }

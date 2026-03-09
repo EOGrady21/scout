@@ -1,5 +1,5 @@
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
-import type { Location, Condition, User } from "@/types";
+import type { Location, Condition, User, RecentConditionFeedItem } from "@/types";
 import type { BadgeDefinition, BadgeMetric, BadgeProgress } from "@/lib/badges";
 
 // Lazily initialise the Neon client so the module can be imported at build
@@ -242,6 +242,34 @@ export async function getConditionsByUserId(userId: string): Promise<(Condition 
     ORDER BY c.created_at DESC
   `;
   return rows as unknown as (Condition & { location_name: string })[];
+}
+
+export async function getRecentConditions(limit = 20): Promise<RecentConditionFeedItem[]> {
+  const sql = getSql();
+  const safeLimit = Math.max(1, Math.min(limit, 100));
+  const rows = await sql`
+    SELECT
+      c.id,
+      c.location_id,
+      c.user_id,
+      c.condition_date,
+      c.rating,
+      c.description,
+      c.photo_url,
+      c.tags,
+      c.created_at,
+      u.name AS user_name,
+      u.image AS user_image,
+      l.name AS location_name,
+      l.latitude,
+      l.longitude
+    FROM conditions c
+    JOIN locations l ON l.id = c.location_id
+    LEFT JOIN users u ON u.id = c.user_id
+    ORDER BY c.created_at DESC
+    LIMIT ${safeLimit}
+  `;
+  return rows as unknown as RecentConditionFeedItem[];
 }
 
 export async function upsertBadgeCatalog(badges: BadgeDefinition[]): Promise<void> {
