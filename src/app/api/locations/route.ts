@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocationsWithFilters, createLocation, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { QUICK_TAGS } from "@/lib/tags";
+import { MAP_FILTER_TAGS } from "@/lib/tags";
 import {
   addRateLimitHeaders,
   applyRateLimit,
@@ -43,11 +43,11 @@ export async function GET(request: NextRequest) {
     );
 
     const invalidTag = tags.find(
-      (tag) => !QUICK_TAGS.includes(tag as (typeof QUICK_TAGS)[number])
+      (tag) => !MAP_FILTER_TAGS.includes(tag as (typeof MAP_FILTER_TAGS)[number])
     );
     if (invalidTag) {
       return NextResponse.json(
-        { error: `Invalid quick tag: ${invalidTag}` },
+        { error: `Invalid map filter tag: ${invalidTag}` },
         { status: 400 }
       );
     }

@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "re
 import L from "leaflet";
 import Link from "next/link";
 import { Location } from "@/types";
-import { QUICK_TAGS } from "@/lib/tags";
+import { MAP_FILTER_TAGS } from "@/lib/tags";
 import "leaflet/dist/leaflet.css";
 
 
@@ -245,7 +245,7 @@ export default function Map({ initialLocations }: MapProps) {
           />
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
-          {QUICK_TAGS.map((tag) => {
+          {MAP_FILTER_TAGS.map((tag) => {
             const selected = selectedTags.includes(tag);
             return (
               <button
