@@ -28,13 +28,13 @@ return (
           <li><a href="#main-page"            className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">My Home</a></li>
           <li><a href="#conditions"           className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Conditions</a></li>
           <li><a href="#map-view"             className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Map View</a></li>
-          <li><a href="#add-trail-report"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add a Trail Report</a></li>
+          <li><a href="#add-new-trail"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add New Trail</a></li>
         </ul>
       </nav>
     </aside>
 
     {/* ===== SCROLLABLE MAIN CONTENT ===== */}
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto" style={{ marginLeft: "16px", marginRight: "16px" }}>
 
       <section id="main-page" className="p-6 border-b border-gray-200">
         <h2 className="text-xl font-bold mb-4">Welcome Scout!</h2>
@@ -42,7 +42,7 @@ return (
         {/* Your content here */}
       </section>
 
-      <section id="conditions" className="p-6 border-b border-gray-200">
+      <section id="conditions" className="p-6 border-b border-gray-200" style={{ marginLeft: "16px", marginRight: "16px" }}>
         <h2 className="text-xl font-bold mb-4">Conditions</h2>
         {/* Location cards from the database go here */}
         <div className="space-y-3">
@@ -56,7 +56,7 @@ return (
         </div>
       </section>
 
-      <section id="map-view" className="p-6 border-b border-gray-200">
+      <section id="map-view" className="p-6 border-b border-gray-200" style={{ marginLeft: "16px", marginRight: "16px" }}>
         <h2 className="text-xl font-bold mb-4">Map View</h2>
         {/* The existing map component goes here */}
         <div className="h-[500px] relative rounded-lg overflow-hidden">
@@ -64,12 +64,12 @@ return (
         </div>
       </section>
 
-      <section id="add-trail-report" className="p-6">
-        <h2 className="text-xl font-bold mb-4">Add a Trail Report</h2>
+      <section id="add-new-trail" className="p-6" style={{ marginLeft: "16px", marginRight: "16px" }}>
+        <h2 className="text-xl font-bold mb-4">Add New Trail</h2>
         {!session ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
             <p className="text-gray-600">
-              You must be logged in with Google to submit a trail report.
+              You must be logged in with Google to submit a new trail or report.
             </p>
             <SignInButton />
           </div>
