@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLocations, createLocation, upsertUser } from "@/lib/db";
+import { getLocationsWithFilters, createLocation, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { MAP_FILTER_TAGS } from "@/lib/tags";
 import {
   addRateLimitHeaders,
   applyRateLimit,
@@ -8,9 +9,61 @@ import {
   rateLimitExceededResponse,
 } from "@/lib/rate-limit";
 
-export async function GET() {
+function parseCoordinate(value: string | null, min: number, max: number): number | undefined {
+  if (value == null || value.trim() === "") return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new Error("Invalid coordinate");
+  }
+  return parsed;
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const locations = await getLocations();
+    const searchParams = request.nextUrl.searchParams;
+    const south = parseCoordinate(searchParams.get("south"), -90, 90);
+    const north = parseCoordinate(searchParams.get("north"), -90, 90);
+    const west = parseCoordinate(searchParams.get("west"), -180, 180);
+    const east = parseCoordinate(searchParams.get("east"), -180, 180);
+
+    if (south != null && north != null && south > north) {
+      return NextResponse.json(
+        { error: "Invalid bounds: south cannot be greater than north" },
+        { status: 400 }
+      );
+    }
+
+    const tags = Array.from(
+      new Set(
+        searchParams
+          .getAll("tag")
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
+
+    const invalidTag = tags.find(
+      (tag) => !MAP_FILTER_TAGS.includes(tag as (typeof MAP_FILTER_TAGS)[number])
+    );
+    if (invalidTag) {
+      return NextResponse.json(
+        { error: `Invalid map filter tag: ${invalidTag}` },
+        { status: 400 }
+      );
+    }
+
+    const rawQuery = searchParams.get("q");
+    const query = rawQuery?.trim() ? rawQuery.trim() : undefined;
+
+    const locations = await getLocationsWithFilters({
+      south,
+      north,
+      west,
+      east,
+      tags,
+      query,
+    });
+
     const safeLocations = locations.map(({ created_by, ...location }) => location);
     return NextResponse.json(safeLocations);
   } catch (err) {

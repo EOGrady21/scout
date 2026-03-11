@@ -25,12 +25,28 @@ A community-driven platform for discovering and sharing outdoor location conditi
 | Storage | Cloudinary |
 | Deployment | Vercel |
 
+## Software Requirements (First-Time Setup)
+
+Install these tools before running the project:
+
+- [Git](https://git-scm.com/downloads)
+- [Node.js LTS](https://nodejs.org/en/download) (includes `npm`)
+- [Visual Studio Code](https://code.visualstudio.com/)
+
+Verify install:
+
+```bash
+git --version
+node --version
+npm --version
+```
+
 ## Getting Started
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/scout.git
+git clone https://github.com/EOGrady21/scout.git
 cd scout
 ```
 
@@ -42,29 +58,22 @@ npm install
 
 ### 3. Set up environment variables
 
+macOS/Linux:
+
 ```bash
 cp .env.example .env.local
 ```
 
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
 Fill in the values in `.env.local` (see [Environment Variables](#environment-variables) below).
 
-### 4. Set up the database
 
-Create a [Neon](https://neon.tech) project (free tier is sufficient) and copy the connection string into `DATABASE_URL` in your `.env.local`. Then run the setup script to apply the schema:
-
-```bash
-npm run db:setup
-```
-
-This executes `src/db/schema.sql` against your Neon database, enabling the PostGIS extension and creating all required tables and indexes.
-
-Alternatively, you can apply the schema directly with `psql`:
-
-```bash
-psql "$DATABASE_URL" -f src/db/schema.sql
-```
-
-### 5. Start the development server
+### 4. Start the development server
 
 ```bash
 npm run dev
@@ -85,18 +94,13 @@ Open [http://localhost:3000](http://localhost:3000).
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (public/client-side) |
-| `RATE_LIMIT_UPLOAD_MAX` | Max `POST /api/upload` requests per window (default: `10`) |
-| `RATE_LIMIT_UPLOAD_WINDOW_MS` | Window in ms for upload limit (default: `60000`) |
-| `RATE_LIMIT_CONDITIONS_MAX` | Max `POST /api/conditions` requests per window (default: `20`) |
-| `RATE_LIMIT_CONDITIONS_WINDOW_MS` | Window in ms for conditions limit (default: `300000`) |
-| `RATE_LIMIT_LOCATIONS_MAX` | Max `POST /api/locations` requests per window (default: `10`) |
-| `RATE_LIMIT_LOCATIONS_WINDOW_MS` | Window in ms for locations limit (default: `600000`) |
+| `RATE_LIMIT_UPLOAD_MAX` | Max upload requests per window (optional) |
+| `RATE_LIMIT_UPLOAD_WINDOW_MS` | Upload window duration in ms (optional) |
+| `RATE_LIMIT_CONDITIONS_MAX` | Max condition submission requests per window (optional) |
+| `RATE_LIMIT_CONDITIONS_WINDOW_MS` | Condition submission window duration in ms (optional) |
+| `RATE_LIMIT_LOCATIONS_MAX` | Max location submission requests per window (optional) |
+| `RATE_LIMIT_LOCATIONS_WINDOW_MS` | Location submission window duration in ms (optional) |
 
-### Getting credentials
-
-- **Google OAuth**: [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → OAuth 2.0 Client. Add `http://localhost:3000/api/auth/callback/google` as an authorised redirect URI.
-- **Neon**: [neon.tech](https://neon.tech) — create a free project and enable the PostGIS extension.
-- **Cloudinary**: [cloudinary.com](https://cloudinary.com) — free tier is sufficient.
 
 ## Project Structure
 
@@ -131,35 +135,19 @@ src/
     └── index.ts                  # TypeScript types
 ```
 
-## Deployment
 
-### Vercel (recommended)
-
-1. Push to GitHub
-2. Import the repository in [Vercel](https://vercel.com)
-3. Add all environment variables in the Vercel dashboard
-4. Update `NEXTAUTH_URL` to your Vercel deployment URL
-5. Add the Vercel URL as an authorised redirect URI in Google Cloud Console
-
-```bash
-# One-time deployment
-vercel --prod
-```
-
-## Database Schema
-
-The app uses PostGIS for geospatial features:
-
-- **users** — OAuth user accounts
-- **locations** — Scout locations with `geometry(Point, 4326)` for lat/lon
-- **conditions** — Condition reports with ratings, descriptions, and optional photos
-
-A GIST index on `locations.geom` enables fast bounding-box and nearest-neighbour queries.
 
 ## License
 
 MIT
-DRAFT: A community conditions platform where you can scout your next adventure
+
+## Authors
+
+- Sydeny Parsons
+- Patricka Abankwa
+- Bibekta Malla
+- Emily O'Grady
+
 
 
 ## Development TODO List
@@ -169,5 +157,4 @@ DRAFT: A community conditions platform where you can scout your next adventure
 - add badges to profiles
 - add one verified location demo
 - add location badges
-- 
 - business profile option

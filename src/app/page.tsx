@@ -1,10 +1,10 @@
-import { getLocations } from "@/lib/db";
-import LocationCard from "@/components/LocationCard";
+import { getLocations, getRecentConditions } from "@/lib/db";
 import MapWrapper from "@/components/MapWrapper";
 import Link from "next/link";
-import { Location } from "@/types";
+import { Location, RecentConditionFeedItem } from "@/types";
 import { auth } from "@/lib/auth";
 import SignInButton from "@/components/SignInButton";
+import LiveConditionsFeed from "@/components/LiveConditionsFeed";
 
 
 export const revalidate = 60;
@@ -12,8 +12,12 @@ export const revalidate = 60;
 export default async function HomePage() {
   const session = await auth();
   let locations: Location[] = [];
+  let recentConditions: RecentConditionFeedItem[] = [];
   try {
-    locations = await getLocations();
+    [locations, recentConditions] = await Promise.all([
+      getLocations(),
+      getRecentConditions(50),
+    ]);
   } catch {
     // DB may not be configured during development
   }
@@ -42,18 +46,9 @@ return (
         {/* Your content here */}
       </section>
 
-      <section id="conditions" className="p-6 border-b border-gray-200" style={{ marginLeft: "16px", marginRight: "16px" }}>
-        <h2 className="text-xl font-bold mb-4">Conditions</h2>
-        {/* Location cards from the database go here */}
-        <div className="space-y-3">
-          {locations.length === 0 ? (
-            <p className="text-gray-500 text-sm">No locations yet. <Link href="/submit" className="text-scout-green hover:underline">Be the first to add one!</Link></p>
-          ) : (
-            locations.map((location) => (
-              <LocationCard key={location.id} location={location} />
-            ))
-          )}
-        </div>
+      <section id="conditions" className="p-6 border-b border-gray-200">
+        <h2 className="text-xl font-bold mb-4">Live Conditions Feed</h2>
+        <LiveConditionsFeed conditions={recentConditions} initialCount={5} />
       </section>
 
       <section id="map-view" className="p-6 border-b border-gray-200" style={{ marginLeft: "16px", marginRight: "16px" }}>

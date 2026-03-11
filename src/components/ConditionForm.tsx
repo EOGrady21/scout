@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { RATING_LABELS } from "@/types";
+import { QUICK_TAGS } from "@/lib/tags";
 
 interface ConditionFormProps {
   locationId: string;
@@ -19,6 +20,7 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
     new Date().toISOString().split("T")[0]
   );
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,7 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
           rating,
           description,
           photo_url: photoUrl,
+          tags,
         }),
       });
 
@@ -78,6 +81,7 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
       setDescription("");
       setRating(3);
       setPhotoFile(null);
+      setTags([]);
       setPhotoPreview(null);
       if (fileRef.current) fileRef.current.value = "";
       router.refresh();
@@ -89,6 +93,14 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
   }
 
   const ratingLabels = RATING_LABELS;
+
+  function toggleTag(tag: string) {
+    setTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : [...prev, tag],
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,6 +158,31 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
           placeholder="Describe current conditions..."
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-scout-green resize-none"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Quick Tags (optional)
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_TAGS.map((tag) => {
+            const active = tags.includes(tag);
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => toggleTag(tag)}
+                className={`px-2.5 py-1 rounded-full border text-xs font-medium transition-colors ${
+                  active
+                    ? "bg-scout-green text-white border-scout-green"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-scout-green"
+                }`}
+              >
+                {tag}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div>
