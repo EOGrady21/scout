@@ -10,6 +10,9 @@ import {
 
 export const runtime = "nodejs";
 
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const PHOTO_UPLOAD_LIMIT_MESSAGE = "Photo upload size limit 4MB";
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -44,10 +47,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 10 MB limit
-    if (file.size > 10 * 1024 * 1024) {
+    // Keep under common serverless request body limits in production.
+    if (file.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json(
-        { error: "File too large. Maximum size is 10MB." },
+        { error: PHOTO_UPLOAD_LIMIT_MESSAGE },
         { status: 400 }
       );
     }
