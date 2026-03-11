@@ -2,13 +2,29 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { upsertUser } from "./db";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret =
+  process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+
+const providers = [];
+if (googleClientId && googleClientSecret) {
+  providers.push(
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    })
+  );
+} else {
+  console.warn(
+    "Google OAuth is not fully configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in production."
+  );
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: authSecret,
+  trustHost: true,
+  providers,
   callbacks: {
     async signIn({ user }) {
       if (!user.email) return false;
