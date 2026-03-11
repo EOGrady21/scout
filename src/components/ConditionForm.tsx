@@ -10,6 +10,13 @@ interface ConditionFormProps {
   locationId: string;
 }
 
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const PHOTO_UPLOAD_LIMIT_MESSAGE = "Photo upload size limit 4MB";
+
+type ApiErrorResponse = {
+  error?: string;
+};
+
 export default function ConditionForm({ locationId }: ConditionFormProps) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -25,9 +32,40 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  async function parseErrorMessage(
+    response: Response,
+    fallback: string
+  ): Promise<string> {
+    const text = await response.text();
+    if (!text) return fallback;
+
+    try {
+      const data = JSON.parse(text) as ApiErrorResponse;
+      if (data.error && /(too large|size limit|413)/i.test(data.error)) {
+        return PHOTO_UPLOAD_LIMIT_MESSAGE;
+      }
+      return data.error ?? fallback;
+    } catch {
+      if (/(request entity too large|payload too large|file too large|413)/i.test(text)) {
+        return PHOTO_UPLOAD_LIMIT_MESSAGE;
+      }
+      return fallback;
+    }
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
+
+    if (file && file.size > MAX_UPLOAD_BYTES) {
+      setPhotoFile(null);
+      setPhotoPreview(null);
+      if (fileRef.current) fileRef.current.value = "";
+      setError(PHOTO_UPLOAD_LIMIT_MESSAGE);
+      return;
+    }
+
     setPhotoFile(file);
+    setError(null);
     if (file) {
       const reader = new FileReader();
       reader.onload = () => setPhotoPreview(reader.result as string);
@@ -46,6 +84,10 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
       let photoUrl: string | null = null;
 
       if (photoFile) {
+        if (photoFile.size > MAX_UPLOAD_BYTES) {
+          throw new Error(PHOTO_UPLOAD_LIMIT_MESSAGE);
+        }
+
         const formData = new FormData();
         formData.append("file", photoFile);
         const uploadRes = await fetch("/api/upload", {
@@ -53,8 +95,8 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
           body: formData,
         });
         if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          throw new Error(data.error ?? "Photo upload failed");
+          const message = await parseErrorMessage(uploadRes, "Photo upload failed");
+          throw new Error(message);
         }
         const uploadData = await uploadRes.json();
         photoUrl = uploadData.url;
@@ -74,8 +116,8 @@ export default function ConditionForm({ locationId }: ConditionFormProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to submit condition");
+        const message = await parseErrorMessage(res, "Failed to submit condition");
+        throw new Error(message);
       }
 
       setDescription("");
