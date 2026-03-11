@@ -1,5 +1,6 @@
 import { neon, NeonQueryFunction } from "@neondatabase/serverless";
-import type { Location, Condition, User } from "@/types";
+import type { Location, Condition, User, RecentConditionFeedItem } from "@/types";
+import type { BadgeDefinition, BadgeMetric, BadgeProgress } from "@/lib/badges";
 
 // Lazily initialise the Neon client so the module can be imported at build
 // time even when DATABASE_URL is not yet set (e.g. during `next build` CI).
@@ -14,7 +15,34 @@ function getSql(): NeonQueryFunction<false, false> {
 }
 
 export async function getLocations(): Promise<Location[]> {
+  return getLocationsWithFilters();
+}
+
+type LocationFilters = {
+  south?: number;
+  north?: number;
+  west?: number;
+  east?: number;
+  tags?: string[];
+  query?: string;
+};
+
+export async function getLocationsWithFilters(filters: LocationFilters = {}): Promise<Location[]> {
   const sql = getSql();
+  const {
+    south,
+    north,
+    west,
+    east,
+    tags,
+    query,
+  } = filters;
+
+  const hasLongitudeBounds = typeof west === "number" && typeof east === "number";
+  const crossesAntimeridian = hasLongitudeBounds && west > east;
+  const keywordPattern = query ? `%${query}%` : null;
+  const normalizedTags = tags && tags.length > 0 ? Array.from(new Set(tags)) : null;
+
   const rows = await sql`
     SELECT
       l.id,
@@ -27,6 +55,34 @@ export async function getLocations(): Promise<Location[]> {
       AVG(c.rating)::float AS latest_rating
     FROM locations l
     LEFT JOIN conditions c ON c.location_id = l.id
+    WHERE (${south ?? null}::float8 IS NULL OR l.latitude >= ${south ?? null})
+      AND (${north ?? null}::float8 IS NULL OR l.latitude <= ${north ?? null})
+      AND (
+        ${west ?? null}::float8 IS NULL
+        OR ${east ?? null}::float8 IS NULL
+        OR (
+          ${crossesAntimeridian}
+          AND (l.longitude >= ${west ?? null} OR l.longitude <= ${east ?? null})
+        )
+        OR (
+          NOT ${crossesAntimeridian}
+          AND l.longitude BETWEEN ${west ?? null} AND ${east ?? null}
+        )
+      )
+      AND (
+        ${normalizedTags}::text[] IS NULL
+        OR EXISTS (
+          SELECT 1
+          FROM conditions c2
+          WHERE c2.location_id = l.id
+            AND c2.tags && ${normalizedTags}::text[]
+        )
+      )
+      AND (
+        ${keywordPattern}::text IS NULL
+        OR l.name ILIKE ${keywordPattern}
+        OR l.description ILIKE ${keywordPattern}
+      )
     GROUP BY l.id
     ORDER BY l.created_at DESC
   `;
@@ -59,6 +115,7 @@ export async function getConditionsByLocationId(locationId: string): Promise<Con
       c.rating,
       c.description,
       c.photo_url,
+      c.tags,
       c.created_at,
       u.name AS user_name,
       u.image AS user_image
@@ -101,19 +158,21 @@ export async function createCondition(data: {
   rating: number;
   description: string;
   photo_url: string | null;
+  tags: string[];
 }): Promise<Condition> {
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO conditions (location_id, user_id, condition_date, rating, description, photo_url)
+    INSERT INTO conditions (location_id, user_id, condition_date, rating, description, photo_url, tags)
     VALUES (
       ${data.location_id},
       ${data.user_id},
       ${data.condition_date},
       ${data.rating},
       ${data.description},
-      ${data.photo_url}
+      ${data.photo_url},
+      ${data.tags}
     )
-    RETURNING id, location_id, user_id, condition_date, rating, description, photo_url, created_at
+    RETURNING id, location_id, user_id, condition_date, rating, description, photo_url, tags, created_at
   `;
   return (rows as unknown as Condition[])[0];
 }
@@ -174,6 +233,7 @@ export async function getConditionsByUserId(userId: string): Promise<(Condition 
       c.rating,
       c.description,
       c.photo_url,
+      c.tags,
       c.created_at,
       l.name AS location_name
     FROM conditions c
@@ -182,4 +242,130 @@ export async function getConditionsByUserId(userId: string): Promise<(Condition 
     ORDER BY c.created_at DESC
   `;
   return rows as unknown as (Condition & { location_name: string })[];
+}
+
+export async function getRecentConditions(limit = 20): Promise<RecentConditionFeedItem[]> {
+  const sql = getSql();
+  const safeLimit = Math.max(1, Math.min(limit, 100));
+  const rows = await sql`
+    SELECT
+      c.id,
+      c.location_id,
+      c.user_id,
+      c.condition_date,
+      c.rating,
+      c.description,
+      c.photo_url,
+      c.tags,
+      c.created_at,
+      u.name AS user_name,
+      u.image AS user_image,
+      l.name AS location_name,
+      l.latitude,
+      l.longitude
+    FROM conditions c
+    JOIN locations l ON l.id = c.location_id
+    LEFT JOIN users u ON u.id = c.user_id
+    ORDER BY c.created_at DESC
+    LIMIT ${safeLimit}
+  `;
+  return rows as unknown as RecentConditionFeedItem[];
+}
+
+export async function upsertBadgeCatalog(badges: BadgeDefinition[]): Promise<void> {
+  const sql = getSql();
+
+  for (const badge of badges) {
+    await sql`
+      INSERT INTO badges (id, name, description, icon_path, metric, target)
+      VALUES (
+        ${badge.id},
+        ${badge.name},
+        ${badge.description},
+        ${badge.iconPath},
+        ${badge.metric},
+        ${badge.target}
+      )
+      ON CONFLICT (id) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        description = EXCLUDED.description,
+        icon_path = EXCLUDED.icon_path,
+        metric = EXCLUDED.metric,
+        target = EXCLUDED.target
+    `;
+  }
+}
+
+export async function upsertUserBadgeProgress(
+  userId: string,
+  badges: BadgeProgress[],
+): Promise<void> {
+  const sql = getSql();
+
+  for (const badge of badges) {
+    await sql`
+      INSERT INTO user_badges (user_id, badge_id, current_value, earned, earned_at)
+      VALUES (
+        ${userId},
+        ${badge.id},
+        ${badge.current},
+        ${badge.earned},
+        ${badge.earnedAt}
+      )
+      ON CONFLICT (user_id, badge_id) DO UPDATE
+      SET
+        current_value = EXCLUDED.current_value,
+        earned = EXCLUDED.earned,
+        earned_at = CASE
+          WHEN user_badges.earned_at IS NOT NULL THEN user_badges.earned_at
+          ELSE EXCLUDED.earned_at
+        END,
+        updated_at = NOW()
+    `;
+  }
+}
+
+export async function getUserBadgeProgress(userId: string): Promise<BadgeProgress[]> {
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      b.id,
+      b.name,
+      b.description,
+      b.icon_path,
+      b.metric,
+      b.target,
+      COALESCE(ub.current_value, 0)::int AS current,
+      COALESCE(ub.earned, FALSE) AS earned,
+      ub.earned_at
+    FROM badges b
+    LEFT JOIN user_badges ub
+      ON ub.badge_id = b.id
+      AND ub.user_id = ${userId}
+    ORDER BY b.id
+  `;
+
+  return (rows as unknown as Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon_path: string;
+    metric: BadgeMetric;
+    target: number;
+    current: number;
+    earned: boolean;
+    earned_at: string | null;
+  }>).map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    iconPath: row.icon_path,
+    metric: row.metric,
+    target: row.target,
+    current: row.current,
+    earned: row.earned,
+    percent: Math.min(100, Math.round((row.current / row.target) * 100)),
+    earnedAt: row.earned_at,
+  }));
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCondition, upsertUser } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { QUICK_TAGS } from "@/lib/tags";
 import {
   addRateLimitHeaders,
   applyRateLimit,
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     });
 
     const body = await request.json();
-    const { location_id, condition_date, rating, description, photo_url } = body;
+    const { location_id, condition_date, rating, description, photo_url, tags } = body;
 
     if (!location_id || !condition_date || !rating || !description) {
       return NextResponse.json(
@@ -60,6 +61,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedTags = Array.isArray(tags)
+      ? tags
+          .map((tag) => String(tag).trim().toLowerCase())
+          .filter(Boolean)
+      : [];
+
+    const uniqueTags = Array.from(new Set(parsedTags));
+    const invalidTag = uniqueTags.find((tag) => !QUICK_TAGS.includes(tag as (typeof QUICK_TAGS)[number]));
+    if (invalidTag) {
+      return NextResponse.json(
+        { error: `Invalid quick tag: ${invalidTag}` },
+        { status: 400 }
+      );
+    }
+
     const condition = await createCondition({
       location_id: String(location_id),
       user_id: user.id,
@@ -67,6 +83,7 @@ export async function POST(request: NextRequest) {
       rating: ratingNum,
       description: String(description).trim(),
       photo_url: photo_url ? String(photo_url) : null,
+      tags: uniqueTags,
     });
 
     const { user_id, ...safeCondition } = condition;
