@@ -11,3 +11,17 @@
 .leaflet-popup-tip {
   background: white;
 }
+
+/* ===== MOBILE LAYOUT CONTROLS (MANUAL FRONT-END EDIT SECTION) =====
+   This section controls mobile drawer layering and scrolling behavior.
+   Keep desktop unaffected by scoping rules to max-width: 767px.
+*/
+@media (max-width: 767px) {
+  .mobile-left-drawer {
+    will-change: transform;
+  }
+
+  .mobile-drawer-overlay {
+    backdrop-filter: blur(1px);
+  }
+}
