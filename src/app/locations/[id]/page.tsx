@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getLocationById, getConditionsByLocationId } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import ConditionForm from "@/components/ConditionForm";
+import LocationDetailMapWrapper from "@/components/LocationDetailMapWrapper";
 import { Condition, Location, RATING_LABELS } from "@/types";
 
 interface PageProps {
@@ -57,6 +58,13 @@ export default async function LocationPage({ params }: PageProps) {
         <p className="text-sm text-gray-400">
           {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
         </p>
+        <div className="mt-4 h-72 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+          <LocationDetailMapWrapper
+            latitude={location.latitude}
+            longitude={location.longitude}
+            name={location.name}
+          />
+        </div>
       </div>
 
       {/* Condition reports */}
@@ -107,6 +115,18 @@ export default async function LocationPage({ params }: PageProps) {
                   })}
                 </p>
                 <p className="text-gray-700 text-sm">{c.description}</p>
+                {c.tags && c.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {c.tags.map((tag) => (
+                      <span
+                        key={`${c.id}-${tag}`}
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {c.photo_url && (
                   <div className="mt-3 relative h-56 rounded-lg overflow-hidden">
                     <Image
