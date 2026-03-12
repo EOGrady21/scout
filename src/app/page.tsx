@@ -5,6 +5,8 @@ import { Location, RecentConditionFeedItem } from "@/types";
 import { auth } from "@/lib/auth";
 import SignInButton from "@/components/SignInButton";
 import LiveConditionsFeed from "@/components/LiveConditionsFeed";
+import Image from "next/image";
+import { getUserBadgeProgress } from "@/lib/db";
 
 
 export const revalidate = 60;
@@ -26,25 +28,93 @@ return (
   <div className="flex h-[calc(100vh-3.5rem)]">
 
     {/* ===== LEFT SIDEBAR ===== */}
-    <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 sticky top-0 h-full overflow-hidden p-4">
-      <nav>
-        <ul className="space-y-2">
-          <li><a href="#main-page"            className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">My Home</a></li>
-          <li><a href="#conditions"           className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Conditions</a></li>
-          <li><a href="#map-view"             className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Map View</a></li>
-          <li><a href="#add-trail-report"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add a Trail Report</a></li>
+
+{/* 1. side bar till top */}
+    {/* <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 sticky top-0 h-full overflow-hidden p-4"> */}
+    <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 fixed top-0 left-0 h-screen overflow-hidden flex flex-col z-50">
+
+        {/* Decorative mountains */}
+        <svg className="absolute bottom-0 left-0 w-full opacity-[0.04] pointer-events-none" viewBox="0 0 230 300" fill="none">
+          <polygon points="0,300 80,120 160,300" fill="white"/>
+          <polygon points="70,300 160,80 250,300" fill="white"/>
+        </svg>
+
+        {/* 2. Adding Logo */}
+        <div className="px-20 pt-3 pb-2 border-b border-white/15">
+        <a href="/"><img src="/badges/logoWhite.svg" alt="SCOUT" className="h-15 w-auto" /> 
+         </a></div>
+
+
+      <nav className="pl-4 pt-3">
+        <ul className="space-y-3">
+          <li><a href="#main-page"            className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
+            <img src="/badges/whome.svg" alt="home" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+            <img src="/badges/bhome.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+            My Home</a></li>
+
+          <li><a href="#conditions" className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
+            <img src="/badges/wcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+            <img src="/badges/bcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+            Conditions</a></li>    
+
+          <li><a href="#map-view"             className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
+            <img src="/badges/wmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+            <img src="/badges/bmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+            Map View</a></li>
+
+          <li><a href="#add-trail-report"  className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
+            <img src="/badges/wnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+            <img src="/badges/bnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+            Add a Trail</a></li>
+
         </ul>
       </nav>
-    </aside>
+  </aside>
+
+
 
     {/* ===== SCROLLABLE MAIN CONTENT ===== */}
-    <div className="flex-1 overflow-y-auto">
 
-      <section id="main-page" className="p-6 border-b border-gray-200">
+    {/* 3.fixes after making sidebar full length */}
+
+    {/* <div className="flex-1 overflow-y-auto"> */}
+    <div className="flex-1 overflow-y-auto ml-64"> 
+      
+
+{/* OLD WELCOME */}
+      {/* <section id="main-page" className="p-6 border-b border-gray-200">
         <h2 className="text-xl font-bold mb-4">Welcome Scout!</h2>
-        <p>Review trails and outdoor spaces in your community in our web app. Sign in to get started. Your adventure awaits!</p>
-        {/* Your content here */}
-      </section>
+        <p>Review trails and outdoor spaces in your community in our web app. Sign in to get started. Your adventure awaits!</p> */}
+        
+        
+        {/* 4.New Welcome SECTION BOX */}
+        <section id="main-page" className="p-6 border-b border-gray-200">
+            <div className="bg-[#0b6038] rounded-2xl px-8 py-8 text-white relative overflow-hidden">
+
+              {/* Decorative */}
+              <svg className="absolute right-0 top-0 h-full w-1/2 opacity-[0.06] pointer-events-none" viewBox="0 0 400 200" fill="none">
+              <polygon points="80,190 180,20 280,190" fill="white" strokeWidth="1.5"/>
+              <polygon points="180,190 280,60 380,190" fill="white" strokeWidth="1.5"/>
+              <polygon points="260,190 340,90 420,190" fill="white" strokeWidth="1.5"/>
+              </svg>
+
+              
+               <p className="text-white/60 text-xs uppercase tracking-widest mb-2">Live Community Updates</p>
+                <h2 className="text-2xl font-bold mb-2">
+                  {session ? `Hi, ${session.user?.name?.split(" ")[0]}! 👋` : "Welcome to Scout! 👋"}
+                  </h2>
+                  <p className="text-white/60 text-sm mb-6 max-w-md">
+                  {session? "Great to see you out there! Ready to share live conditions or explore new trails near you?"
+                  : "Discover real-time conditions of places you want to visit, share what you see, and help others explore safely. Sign in to get started. Your adventure awaits!"}
+                  </p>
+                <div className="flex gap-3">
+                  <a href="#map-view" className="bg-white/20 hover:bg-white/30 transition-colors text-white text-sm font-semibold px-5 py-2 rounded-lg">
+                  Explore Map →</a>
+                </div>
+             </div>
+         </section>
+
+
 
       <section id="conditions" className="p-6 border-b border-gray-200">
         <h2 className="text-xl font-bold mb-4">Live Conditions Feed</h2>
@@ -60,7 +130,7 @@ return (
       </section>
 
       <section id="add-trail-report" className="p-6">
-        <h2 className="text-xl font-bold mb-4">Add a Trail Report</h2>
+        <h2 className="text-xl font-bold mb-4">Add a Trail </h2>
         {!session ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
             <p className="text-gray-600">
@@ -71,14 +141,15 @@ return (
         ) : (
           <Link
             href="/submit"
-            className="inline-block bg-[#0b6038] text-white px-6 py-2 rounded hover:bg-[#094d2c] transition-colors font-medium"
-          >
-            Add a Trail Report
+            className="inline-block bg-[#0b6038] text-white px-6 py-2 rounded hover:bg-[#094d2c] transition-colors font-medium">
+            Add a Trail 
           </Link>
         )}
       </section>
 
+
     </div>
+
   </div>
 );
 }
