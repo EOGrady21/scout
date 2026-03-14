@@ -20,6 +20,8 @@ type SubmitPinMapProps = {
   onSelect: (latitude: number, longitude: number) => void;
 };
 
+const HALIFAX_CENTER: [number, number] = [44.6488, -63.5752];
+
 function ClickToPlacePin({ onSelect }: { onSelect: SubmitPinMapProps["onSelect"] }) {
   useMapEvents({
     click(event) {
@@ -63,7 +65,7 @@ export default function SubmitPinMap({ latitude, longitude, onSelect }: SubmitPi
 
   return (
     <MapContainer
-      center={selectedPosition ?? [39.5, -98.35]}
+      center={selectedPosition ?? HALIFAX_CENTER}
       zoom={selectedPosition ? 13 : 4}
       style={{ height: "100%", width: "100%" }}
       className="z-0"

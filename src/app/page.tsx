@@ -25,70 +25,109 @@ export default async function HomePage() {
   }
 
 return (
-  <div className="flex h-[calc(100vh-3.5rem)]">
+  <div className="relative flex h-[calc(100vh-3.5rem)]">
 
-    {/* ===== LEFT SIDEBAR ===== */}
+    {/* ===== MOBILE NAV CONTROLS (MANUAL FRONT-END EDIT SECTION) =====
+        Adjust IDs, labels, and responsive classes here to customize mobile menu behavior.
+    */}
+    <input id="mobile-nav-toggle" type="checkbox" className="peer sr-only" aria-label="Toggle menu" />
+    <label
+      htmlFor="mobile-nav-toggle"
+      className="md:hidden fixed top-[4.15rem] left-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-800 shadow-sm"
+      aria-controls="mobile-left-drawer"
+    >
+      <span className="text-xl leading-none">☰</span>
+    </label>
 
-{/* 1. side bar till top */}
-    {/* <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 sticky top-0 h-full overflow-hidden p-4"> */}
-    <aside className="w-64 bg-[#0b6038] text-white flex-shrink-0 fixed top-0 left-0 h-screen overflow-hidden flex flex-col z-50">
+    <label
+      htmlFor="mobile-nav-toggle"
+      className="mobile-drawer-overlay md:hidden fixed inset-0 z-20 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200 peer-checked:opacity-100 peer-checked:pointer-events-auto"
+      aria-hidden="true"
+    />
 
-        {/* Decorative mountains */}
-        <svg className="absolute bottom-0 left-0 w-full opacity-[0.04] pointer-events-none" viewBox="0 0 230 300" fill="none">
-          <polygon points="0,300 80,120 160,300" fill="white"/>
-          <polygon points="70,300 160,80 250,300" fill="white"/>
-        </svg>
+    <aside
+      id="mobile-left-drawer"
+      className="mobile-left-drawer md:hidden fixed top-14 left-0 z-30 h-[calc(100vh-3.5rem)] w-64 bg-[#0b6038] text-white p-4 overflow-y-auto -translate-x-full transition-transform duration-200 peer-checked:translate-x-0"
+    >
+    </aside>
 
-        {/* 2. Adding Logo */}
-        <div className="px-20 pt-3 pb-2 border-b border-white/15">
-        <a href="/"><img src="/badges/logoWhite.svg" alt="SCOUT" className="h-15 w-auto" /> 
-         </a></div>
+   
+{/* ===== LEFT SIDEBAR ===== */}
+<aside className="hidden md:block w-64 bg-[#0b6038] text-white flex-shrink-0 fixed top-0 left-0 h-screen overflow-hidden flex flex-col z-50 p-4">
+
+  {/* Decorative mountains */}
+  <svg className="absolute bottom-0 left-0 w-full opacity-[0.04] pointer-events-none" viewBox="0 0 230 300" fill="none">
+    <polygon points="0,300 80,120 160,300" fill="white"/>
+    <polygon points="70,300 160,80 250,300" fill="white"/>
+  </svg>
+
+  {/* Scout Logo */}
+  <div className="px-20 pt-3 pb-2 border-b border-white/15">
+    <Link href="/">
+      <img src="/badges/logoWhite.svg" alt="SCOUT" className="h-15 w-auto" /> 
+    </Link>
+  </div>
+
+  <nav className="pl-4 pt-3 flex-1 overflow-y-auto">
+    <ul className="space-y-3">
+      <li>
+        <Link 
+          href="#main-page" 
+          className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
+        >
+          <img src="/badges/whome.svg" alt="home" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <img src="/badges/bhome.svg" alt="home" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          My Home
+        </Link>
+      </li>
+
+      <li>
+        <Link 
+          href="#conditions" 
+          className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
+        >
+          <img src="/badges/wcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <img src="/badges/bcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          Conditions
+        </Link>
+      </li>    
+
+      <li>
+        <Link 
+          href="#map-view" 
+          className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
+        >
+          <img src="/badges/wmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <img src="/badges/bmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          Map View
+        </Link>
+      </li>
+
+      <li>
+        <Link 
+          href="#add-trail-report" 
+          className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
+        >
+          <img src="/badges/wnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <img src="/badges/bnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          Add a Trail
+        </Link>
+      </li>
+    </ul>
+  </nav>
+</aside>
 
 
-      <nav className="pl-4 pt-3">
-        <ul className="space-y-3">
-          <li><a href="#main-page"            className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
-            <img src="/badges/whome.svg" alt="home" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-            <img src="/badges/bhome.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
-            My Home</a></li>
-
-          <li><a href="#conditions" className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
-            <img src="/badges/wcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-            <img src="/badges/bcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
-            Conditions</a></li>    
-
-          <li><a href="#map-view"             className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
-            <img src="/badges/wmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-            <img src="/badges/bmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
-            Map View</a></li>
-
-          <li><a href="#add-trail-report"  className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors">
-            <img src="/badges/wnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-            <img src="/badges/bnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
-            Add a Trail</a></li>
-
-        </ul>
-      </nav>
-  </aside>
 
 
 
-    {/* ===== SCROLLABLE MAIN CONTENT ===== */}
+{/* ===== SCROLLABLE MAIN CONTENT ===== */}
+<div className="flex-1 overflow-y-auto pt-16 md:pt-0 md:ml-64"> 
 
-    {/* 3.fixes after making sidebar full length */}
 
-    {/* <div className="flex-1 overflow-y-auto"> */}
-    <div className="flex-1 overflow-y-auto ml-64"> 
-      
-
-{/* OLD WELCOME */}
-      {/* <section id="main-page" className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold mb-4">Welcome Scout!</h2>
-        <p>Review trails and outdoor spaces in your community in our web app. Sign in to get started. Your adventure awaits!</p> */}
-        
         
         {/* 4.New Welcome SECTION BOX */}
-        <section id="main-page" className="p-6 border-b border-gray-200">
+           <section id="main-page" className="p-4 md:p-6 border-b border-gray-200">
             <div className="bg-[#0b6038] rounded-2xl px-8 py-8 text-white relative overflow-hidden">
 
               {/* Decorative */}
@@ -108,29 +147,31 @@ return (
                   : "Discover real-time conditions of places you want to visit, share what you see, and help others explore safely. Sign in to get started. Your adventure awaits!"}
                   </p>
                 <div className="flex gap-3">
-                  <a href="#map-view" className="bg-white/20 hover:bg-white/30 transition-colors text-white text-sm font-semibold px-5 py-2 rounded-lg">
-                  Explore Map →</a>
+                  <Link href="#map-view" className="bg-white/20 hover:bg-white/30 transition-colors text-white text-sm font-semibold px-5 py-2 rounded-lg">
+                  Explore Map →
+                  </Link>
+
                 </div>
              </div>
          </section>
 
 
-
-      <section id="conditions" className="p-6 border-b border-gray-200">
+      <section id="conditions" className="p-4 md:p-6 border-b border-gray-200">
         <h2 className="text-xl font-bold mb-4">Live Conditions Feed</h2>
         <LiveConditionsFeed conditions={recentConditions} initialCount={5} />
       </section>
 
-      <section id="map-view" className="p-6 border-b border-gray-200">
+      <section id="map-view" className="p-4 md:p-6 border-b border-gray-200">
         <h2 className="text-xl font-bold mb-4">Map View</h2>
         {/* The existing map component goes here */}
-        <div className="h-[500px] relative rounded-lg overflow-hidden">
+        <div className="h-[360px] md:h-[500px] relative rounded-lg overflow-hidden">
           <MapWrapper locations={locations} />
         </div>
       </section>
 
-      <section id="add-trail-report" className="p-6">
-        <h2 className="text-xl font-bold mb-4">Add a Trail </h2>
+            <section id="add-trail-report" className="p-4 md:p-6 border-b border-gray-200">
+        <h2 className="text-xl font-bold mb-4">Add a Trail Report</h2>
+        
         {!session ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
             <p className="text-gray-600">
@@ -141,15 +182,15 @@ return (
         ) : (
           <Link
             href="/submit"
-            className="inline-block bg-[#0b6038] text-white px-6 py-2 rounded hover:bg-[#094d2c] transition-colors font-medium">
+            className="inline-block bg-[#0b6038] text-white px-6 py-2 rounded hover:bg-[#094d2c] transition-colors font-medium"
+          >
             Add a Trail 
           </Link>
         )}
       </section>
 
-
+    </div>
     </div>
 
-  </div>
 );
 }

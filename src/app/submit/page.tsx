@@ -9,6 +9,17 @@ type SubmitLocationResponse = {
   error?: string;
 };
 
+const HALIFAX_COORDINATES = {
+  latitude: "44.6488",
+  longitude: "-63.5752",
+};
+
+const FAST_GEOLOCATION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: false,
+  timeout: 4000,
+  maximumAge: 300000,
+};
+
 const SubmitPinMap = dynamic(() => import("@/components/SubmitPinMap"), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-gray-100" />,
@@ -24,10 +35,18 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function setHalifaxFallback() {
+    setLatitude(HALIFAX_COORDINATES.latitude);
+    setLongitude(HALIFAX_COORDINATES.longitude);
+  }
+
   useEffect(() => {
     // Seed the form with geolocation once so the map defaults to the user's position.
     if (latitude || longitude) return;
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setHalifaxFallback();
+      return;
+    }
 
     let isCancelled = false;
     navigator.geolocation.getCurrentPosition(
@@ -37,8 +56,11 @@ export default function SubmitPage() {
         setLongitude(pos.coords.longitude.toFixed(6));
       },
       () => {
-        // Keep a silent fallback to default map center if geolocation is denied/unavailable.
-      }
+        if (isCancelled) return;
+        // Keep a silent fallback to Halifax if geolocation is denied/unavailable.
+        setHalifaxFallback();
+      },
+      FAST_GEOLOCATION_OPTIONS
     );
 
     return () => {
@@ -70,7 +92,8 @@ export default function SubmitPage() {
         setLongitude(pos.coords.longitude.toFixed(6));
         setError(null);
       },
-      () => setError("Unable to retrieve your location.")
+      () => setError("Unable to retrieve your location."),
+      FAST_GEOLOCATION_OPTIONS
     );
   }
 
