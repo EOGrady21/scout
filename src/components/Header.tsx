@@ -6,18 +6,24 @@ export default async function Header() {
   const session = await auth();
 
   return (
-    <header className="bg-scout-dark text-white shadow-md">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          🏕️ SCOUT
-        </Link>
-        <nav className="flex items-center gap-6 text-sm">
+  
+  <header className="bg-white text-white shadow-sm h-14 flex items-center justify-between px-20">
+    <Link href="/">
+    <img src="/badges/logoBlack.svg" alt="SCOUT" className="h-12 w-auto" />
+    </Link>
+
+  <div className="flex items-center">
+         
+        <nav className="flex items-center gap-6 text-sm text-black"> 
+
           <Link href="/" className="hover:text-scout-light transition-colors">
             Home
           </Link>
           <AuthButton session={session} />
         </nav>
+
       </div>
     </header>
+    
   );
 }
