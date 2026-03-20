@@ -175,7 +175,7 @@ return (
         {!session ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
             <p className="text-gray-600">
-              You must be logged in with Google to submit a trail report.
+              You must be logged in with Google to submit a new trail or report.
             </p>
             <SignInButton />
           </div>
