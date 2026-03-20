@@ -64,7 +64,7 @@ return (
           <li><a href="#main-page"            className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">My Home</a></li>
           <li><a href="#conditions"           className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Conditions</a></li>
           <li><a href="#map-view"             className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Map View</a></li>
-          <li><a href="#add-trail-report"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add a Trail Report</a></li>
+          <li><a href="#add-new-trail"      className="block px-3 py-2 rounded hover:bg-gray-300 hover:text-black transition-colors">Add New Trail</a></li>
         </ul>
       </nav>
     </aside>
@@ -96,7 +96,7 @@ return (
         {!session ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 flex flex-col items-center text-center gap-4 max-w-md mx-auto">
             <p className="text-gray-600">
-              You must be logged in with Google to submit a trail report.
+              You must be logged in with Google to submit a new trail or report.
             </p>
             <SignInButton />
           </div>
