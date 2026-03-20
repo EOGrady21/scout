@@ -10,6 +10,22 @@ type LiveConditionsFeedProps = {
   initialCount?: number;
 };
 
+const REPORTED_AT_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "medium",
+  timeZone: "UTC",
+});
+
+function formatReportedAt(timestamp: string) {
+  const date = new Date(timestamp);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown time";
+  }
+
+  return `${REPORTED_AT_FORMATTER.format(date)} UTC`;
+}
+
 function RatingBadge({ rating }: { rating: number }) {
   return (
     <span
@@ -53,9 +69,7 @@ export default function LiveConditionsFeed({ conditions, initialCount = 5 }: Liv
                 <RatingBadge rating={condition.rating} />
               </div>
 
-              <p className="text-xs text-gray-500 mb-2">
-                Reported {new Date(condition.created_at).toLocaleString()}
-              </p>
+              <p className="text-xs text-gray-500 mb-2">Reported {formatReportedAt(condition.created_at)}</p>
 
               <p className="text-sm text-gray-700 mb-3">{condition.description}</p>
 
