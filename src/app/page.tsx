@@ -167,6 +167,25 @@ return (
         )}
       </section>
 
+      <footer className="px-4 py-6 md:px-6 text-center text-xs text-gray-500">
+        <p>
+          By using Scout, you agree to our {" "}
+          <Link href="/privacy" className="underline hover:text-gray-700 transition-colors">
+            Privacy Policy
+          </Link>
+          {" "}and can {" "}
+          <a
+            href="https://github.com/EOGrady21/scout/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-700 transition-colors"
+          >
+            contact us
+          </a>
+          {" "}on GitHub.
+        </p>
+      </footer>
+
     </div>
     </div>
 
