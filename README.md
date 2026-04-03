@@ -2,6 +2,17 @@
 
 A community-driven platform for discovering and sharing outdoor location conditions. Built with Next.js 15, Leaflet/OpenStreetMap, Auth.js (Google OAuth), Neon PostgreSQL (PostGIS), and Cloudinary.
 
+Production hosted at:
+
+https://scout-nine-jade.vercel.app/
+
+
+This project was created as the final project for Dr. Keselj and Dr. FE Bordeleau
+The final report can be found in the final_report directory along with supplementary materials and appendices. 
+
+Please note that if you are viewing this repo on GitLab, there are additional features including CoPilot agent logs available on GitHub (https://github.com/EOGrady21/scout)
+
+For users, out privacy policy can be found 
 ## Features
 
 - 🗺️ Interactive map (Leaflet + OpenStreetMap) showing all community locations
@@ -152,9 +163,12 @@ MIT
 
 ## Development TODO List
 
-- Add map pin drop selection tool to submit a new location
 - move condition report to top of page when looking at a location
-- add badges to profiles
-- add one verified location demo
 - add location badges
 - business profile option
+- enhance search logic (capital sensitivity)
+- add clear time since condition report badges
+- clarify flow to report condition on existing location
+- add stroller friendly filter
+- add bounding box location based search feature
+

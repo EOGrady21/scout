@@ -42,7 +42,7 @@ return (
   {/* Scout Logo */}
   <div className="px-20 pt-3 pb-2 border-b border-white/15">
     <Link href="/">
-      <img src="/badges/logoWhite.svg" alt="SCOUT" className="h-15 w-auto" /> 
+      <Image src="/badges/logoWhite.svg" alt="SCOUT" width={140} height={52} className="h-15 w-auto" /> 
     </Link>
   </div>
 
@@ -53,8 +53,8 @@ return (
           href="#main-page" 
           className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
         >
-          <img src="/badges/whome.svg" alt="home" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-          <img src="/badges/bhome.svg" alt="home" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          <Image src="/badges/whome.svg" alt="home" width={24} height={24} className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <Image src="/badges/bhome.svg" alt="home" width={24} height={24} className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
           My Home
         </Link>
       </li>
@@ -64,8 +64,8 @@ return (
           href="#conditions" 
           className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
         >
-          <img src="/badges/wcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-          <img src="/badges/bcondition.svg" alt="Conditions" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          <Image src="/badges/wcondition.svg" alt="Conditions" width={24} height={24} className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <Image src="/badges/bcondition.svg" alt="Conditions" width={24} height={24} className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
           Conditions
         </Link>
       </li>    
@@ -75,8 +75,8 @@ return (
           href="#map-view" 
           className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
         >
-          <img src="/badges/wmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-          <img src="/badges/bmap.svg" alt="map view" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          <Image src="/badges/wmap.svg" alt="map view" width={24} height={24} className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <Image src="/badges/bmap.svg" alt="map view" width={24} height={24} className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
           Map View
         </Link>
       </li>
@@ -86,8 +86,8 @@ return (
           href="#add-trail-report" 
           className="group flex items-center gap-3 px-6 py-2 rounded-lg text-lg font-medium w-52 hover:bg-gray-300 hover:text-black transition-colors block"
         >
-          <img src="/badges/wnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
-          <img src="/badges/bnewtrail.svg" alt="Trail" className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
+          <Image src="/badges/wnewtrail.svg" alt="Trail" width={24} height={24} className="w-6 h-6 flex-shrink-0 group-hover:hidden" />
+          <Image src="/badges/bnewtrail.svg" alt="Trail" width={24} height={24} className="w-6 h-6 flex-shrink-0 hidden group-hover:block" />
           Add a Trail
         </Link>
       </li>

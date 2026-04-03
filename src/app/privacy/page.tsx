@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
           <p>
             By using Scout you are consenting to the collection and use of your data as outlined
             in this document. You are also consenting to receive emails from Scout, if at any time
-            you wish to revoke this consent please click the "Unsubscribe" button in the email or
+            you wish to revoke this consent please click the &quot;Unsubscribe&quot; button in the email or
             contact us.
           </p>
         </section>

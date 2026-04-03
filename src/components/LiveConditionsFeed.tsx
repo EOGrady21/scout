@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { RecentConditionFeedItem, RATING_LABELS } from "@/types";
 import StaticLocationMapWrapper from "@/components/StaticLocationMapWrapper";
 
@@ -89,11 +90,12 @@ export default function LiveConditionsFeed({ conditions, initialCount = 5 }: Liv
 
             <div className="w-1/4 min-w-[110px] max-w-[180px] self-start">
               {condition.photo_url ? (
-                <img
+                <Image
                   src={condition.photo_url}
                   alt={`Condition report for ${condition.location_name}`}
+                  width={320}
+                  height={192}
                   className="h-24 w-full rounded-lg object-cover border border-gray-100"
-                  loading="lazy"
                 />
               ) : (
                 <div className="relative h-24 w-full overflow-hidden rounded-lg border border-gray-100">
