@@ -12,7 +12,10 @@ The final report can be found in the final_report directory along with supplemen
 
 Please note that if you are viewing this repo on GitLab, there are additional features including CoPilot agent logs available on GitHub (https://github.com/EOGrady21/scout)
 
-For users, out privacy policy can be found 
+For users, out privacy policy can be found here: https://scout-nine-jade.vercel.app/privacy
+Please report any issues or concerns via our GitHub issue board: https://github.com/EOGrady21/scout/issues
+
+
 ## Features
 
 - 🗺️ Interactive map (Leaflet + OpenStreetMap) showing all community locations
